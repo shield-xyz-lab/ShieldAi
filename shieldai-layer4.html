@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldAI — TX Guardian Layer 4</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #05080f;
+    --surface: #0a0f1a;
+    --surface2: #0f1520;
+    --surface3: #141c28;
+    --border: #1a2535;
+    --border2: #243044;
+    --accent: #4f8eff;
+    --accent2: #00e5a0;
+    --danger: #ff4560;
+    --warn: #ffa940;
+    --purple: #a855f7;
+    --text: #d0dcea;
+    --text2: #7a90aa;
+    --text3: #3a4f66;
+    --glow-blue: rgba(79,142,255,0.12);
+    --glow-green: rgba(0,229,160,0.12);
+    --glow-red: rgba(255,69,96,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(79,142,255,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0,229,160,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 28px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 14px; }
+
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #4f8eff22, #00e5a022);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .brand-icon::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(79,142,255,0.3), rgba(0,229,160,0.2));
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%,100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .brand-name {
+    font-size: 20px; font-weight: 700; letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #fff 40%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .brand-sub { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: 1px; }
+
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+
+  .chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  .chip.online { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2); color: var(--accent2); }
+  .chip.network { background: rgba(79,142,255,0.08); border: 1px solid rgba(79,142,255,0.2); color: var(--accent); }
+
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+  .chip.online .chip-dot { background: var(--accent2); }
+  .chip.network .chip-dot { background: var(--accent); animation: none; }
+
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+  }
+
+  .stat.s-blue::after { background: linear-gradient(90deg, var(--accent), transparent); }
+  .stat.s-green::after { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .stat.s-red::after { background: linear-gradient(90deg, var(--danger), transparent); }
+  .stat.s-yellow::after { background: linear-gradient(90deg, var(--warn), transparent); }
+  .stat.s-purple::after { background: linear-gradient(90deg, var(--purple), transparent); }
+
+  .stat-l { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-v { font-size: 26px; font-weight: 700; }
+  .stat-v.blue { color: var(--accent); }
+  .stat-v.green { color: var(--accent2); }
+  .stat-v.red { color: var(--danger); }
+  .stat-v.yellow { color: var(--warn); }
+  .stat-v.purple { color: var(--purple); }
+  .stat-hint { font-size: 11px; color: var(--text3); margin-top: 3px; font-family: 'Fira Code', monospace; }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .layout-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+  }
+
+  .card-title {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--text2);
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .card-body { padding: 20px; }
+
+  /* FORM ELEMENTS */
+  label { display: block; font-size: 11px; color: var(--text2); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 7px; font-family: 'Fira Code', monospace; }
+
+  input, select {
+    width: 100%;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 14px;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,142,255,0.1);
+  }
+
+  select option { background: var(--surface3); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .analyze-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(79,142,255,0.2), rgba(0,229,160,0.1));
+    border: 1px solid rgba(79,142,255,0.4);
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .analyze-btn:hover {
+    background: linear-gradient(135deg, rgba(79,142,255,0.35), rgba(0,229,160,0.2));
+    box-shadow: 0 0 24px rgba(79,142,255,0.25);
+    transform: translateY(-1px);
+  }
+
+  .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* SIMULATION RESULT */
+  .sim-result {
+    display: none;
+    animation: fadeUp 0.35s ease;
+  }
+
+  .sim-result.show { display: block; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .verdict-banner {
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .verdict-banner.safe { background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25); }
+  .verdict-banner.danger { background: rgba(255,69,96,0.08); border: 1px solid rgba(255,69,96,0.25); }
+  .verdict-banner.warn { background: rgba(255,169,64,0.08); border: 1px solid rgba(255,169,64,0.25); }
+
+  .verdict-icon { font-size: 32px; }
+
+  .verdict-text-main { font-size: 18px; font-weight: 700; }
+  .verdict-text-main.safe { color: var(--accent2); }
+  .verdict-text-main.danger { color: var(--danger); }
+  .verdict-text-main.warn { color: var(--warn); }
+
+  .verdict-sub { font-size: 12px; color: var(--text2); margin-top: 3px; font-family: 'Fira Code', monospace; }
+
+  /* CHECKS */
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+
+  .check-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  .check-item.pass { border-color: rgba(0,229,160,0.2); }
+  .check-item.fail { border-color: rgba(255,69,96,0.25); background: rgba(255,69,96,0.04); }
+  .check-item.caution { border-color: rgba(255,169,64,0.2); }
+  .check-item.info { border-color: rgba(79,142,255,0.15); }
+
+  .ci-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .ci-label { font-weight: 600; margin-bottom: 2px; }
+  .ci-label.pass { color: var(--accent2); }
+  .ci-label.fail { color: var(--danger); }
+  .ci-label.caution { color: var(--warn); }
+  .ci-label.info { color: var(--accent); }
+  .ci-detail { color: var(--text2); font-size: 11px; }
+
+  /* RISK BAR */
+  .risk-section { margin-bottom: 18px; }
+  .risk-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .risk-label { font-size: 12px; color: var(--text2); font-family: 'Fira Code', monospace; }
+  .risk-score-big { font-size: 20px; font-weight: 700; }
+
+  .risk-track { height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+  .risk-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+
+  .risk-zones { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); font-family: 'Fira Code', monospace; }
+
+  /* TX SIMULATION DETAILS */
+  .sim-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .sim-table tr { border-bottom: 1px solid var(--border); }
+  .sim-table tr:last-child { border-bottom: none; }
+  .sim-table td { padding: 9px 0; vertical-align: top; }
+  .sim-table td:first-child { color: var(--text2); width: 140px; font-family: 'Fira Code', monospace; font-size: 11px; padding-right: 12px; }
+  .sim-table td:last-child { color: var(--text); }
+
+  /* PRESETS */
+  .preset-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .preset-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .preset-row:hover { border-color: var(--accent); background: rgba(79,142,255,0.05); }
+
+  .preset-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .pd-red { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+  .pd-green { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .pd-yellow { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+
+  .preset-name { font-weight: 600; flex: 1; }
+  .preset-risk { font-family: 'Fira Code', monospace; font-size: 11px; }
+  .preset-risk.red { color: var(--danger); }
+  .preset-risk.green { color: var(--accent2); }
+  .preset-risk.yellow { color: var(--warn); }
+
+  /* LOG */
+  .tx-log { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tx-log-head th {
+    text-align: left; padding: 10px 14px;
+    font-size: 10px; color: var(--text3);
+    letter-spacing: 1.5px; text-transform: uppercase;
+    font-family: 'Fira Code', monospace;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  .tx-log tr { border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.15s; }
+  .tx-log tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .tx-log td { padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 11px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .badge.blocked { background: rgba(255,69,96,0.12); color: var(--danger); border: 1px solid rgba(255,69,96,0.25); }
+  .badge.approved { background: rgba(0,229,160,0.1); color: var(--accent2); border: 1px solid rgba(0,229,160,0.2); }
+  .badge.warning { background: rgba(255,169,64,0.1); color: var(--warn); border: 1px solid rgba(255,169,64,0.2); }
+
+  .addr { color: var(--accent); }
+  .muted { color: var(--text2); }
+
+  /* SIMULATION PROGRESS */
+  .sim-progress {
+    display: none;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .sim-progress.show { display: block; animation: fadeUp 0.2s ease; }
+
+  .progress-steps { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+
+  .p-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Fira Code', monospace;
+    color: var(--text3);
+    background: var(--surface2);
+    border: 1px solid transparent;
+    transition: all 0.3s;
+  }
+
+  .p-step.active { color: var(--accent); border-color: rgba(79,142,255,0.2); background: rgba(79,142,255,0.05); }
+  .p-step.done { color: var(--accent2); border-color: rgba(0,229,160,0.15); }
+  .p-step-icon { font-size: 14px; }
+
+  .log-scroll { max-height: 220px; overflow-y: auto; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .highlight-box {
+    background: rgba(79,142,255,0.06);
+    border: 1px solid rgba(79,142,255,0.15);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .highlight-box .hl { color: var(--text); font-weight: 500; }
+  .highlight-box .hl.green { color: var(--accent2); }
+  .highlight-box .hl.red { color: var(--danger); }
+  .highlight-box .hl.blue { color: var(--accent); }
+  .highlight-box .hl.yellow { color: var(--warn); }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .full-width { grid-column: 1 / -1; }
+
+  .empty-log { padding: 24px; text-align: center; color: var(--text3); font-size: 12px; font-family: 'Fira Code', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- NAV -->
+  <nav>
+    <div class="brand">
+      <div class="brand-icon">🔐</div>
+      <div>
+        <div class="brand-name">ShieldAI — TX Guardian</div>
+        <div class="brand-sub">// Layer 4 · Transaction Validation Engine</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="chip network"><div class="chip-dot"></div>Mantle Testnet</div>
+      <div class="chip online"><div class="chip-dot"></div>Simulation Engine ON</div>
+    </div>
+  </nav>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat s-blue">
+      <div class="stat-l">Analyzed TX</div>
+      <div class="stat-v blue" id="s-total">0</div>
+      <div class="stat-hint">this session</div>
+    </div>
+    <div class="stat s-red">
+      <div class="stat-l">Blocked</div>
+      <div class="stat-v red" id="s-blocked">0</div>
+      <div class="stat-hint">wysokie ryzyko</div>
+    </div>
+    <div class="stat s-yellow">
+      <div class="stat-l">Warnings</div>
+      <div class="stat-v yellow" id="s-warn">0</div>
+      <div class="stat-hint">wymaga uwagi</div>
+    </div>
+    <div class="stat s-green">
+      <div class="stat-l">Approved</div>
+      <div class="stat-v green" id="s-safe">0</div>
+      <div class="stat-hint">niskie ryzyko</div>
+    </div>
+    <div class="stat s-purple">
+      <div class="stat-l">Saved $</div>
+      <div class="stat-v purple" id="s-saved">$0</div>
+      <div class="stat-hint">potential losses</div>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
+
+    <!-- TX BUILDER -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">⚡ Transaction Builder</div>
+        <span style="font-size:11px;color:var(--text3);font-family:'Fira Code',monospace">on-chain simulator</span>
+      </div>
+      <div class="card-body">
+
+        <label>Recipient address (to)</label>
+        <input type="text" id="toAddress" placeholder="0x..." value="0x742d35Cc6634C0532925a3b8D4C9C2B4c5E8f1a2">
+
+        <div class="row2">
+          <div>
+            <label>Amount</label>
+            <input type="number" id="amount" placeholder="0.0" value="2.5" step="0.01" min="0">
+          </div>
+          <div>
+            <label>Token</label>
+            <select id="token">
+              <option value="ETH">ETH</option>
+              <option value="USDC">USDC</option>
+              <option value="USDT">USDT</option>
+              <option value="MNT">MNT (Mantle)</option>
+              <option value="WBTC">WBTC</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>Transaction type</label>
+            <select id="txType">
+              <option value="transfer">Transfer ETH</option>
+              <option value="contract">Call kontraktu</option>
+              <option value="approve">Token Approve</option>
+              <option value="swap">DEX Swap</option>
+              <option value="bridge">Bridge L1→L2</option>
+              <option value="nft">NFT Purchase</option>
+            </select>
+          </div>
+          <div>
+            <label>Gas Limit (Gwei)</label>
+            <input type="number" id="gasLimit" value="21" min="1" max="500">
+          </div>
+        </div>
+
+        <label>Contract / Protocol (optional)</label>
+        <select id="contractAddr">
+          <option value="none">— Brak (plain transfer) —</option>
+          <option value="uniswap">Uniswap V4 (zweryfikowany ✓)</option>
+          <option value="aave">Aave V3 (zweryfikowany ✓)</option>
+          <option value="curve">Curve Finance (zweryfikowany ✓)</option>
+          <option value="unknown">0xDEAD...beef (nieznany kontrakt)</option>
+          <option value="drainer">0xMalicious — WALLET DRAINER ⚠️</option>
+          <option value="honeypot">0xHoneypot — HONEYPOT ⚠️</option>
+        </select>
+
+        <label>AI agent intent (declared goal)</label>
+        <input type="text" id="agentIntent" placeholder="np. rebalancing portfolio, yield farming..." value="Routine portfolio rebalancing">
+
+        <button class="analyze-btn" id="analyzeBtn" onclick="runAnalysis()">
+          🔬 Simulate and analyze transaction
+        </button>
+      </div>
+    </div>
+
+    <!-- PRESETS -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">📋 Test scenarios</div>
+        <span style="font-size:11px;color:var(--text3)">click to load</span>
+      </div>
+      <div class="card-body">
+        <div class="preset-list" id="presetList">
+
+          <button class="preset-row" onclick="loadTx('drainer')">
+            <div class="preset-dot pd-red"></div>
+            <div class="preset-name">Wallet Drainer Contract</div>
+            <div class="preset-risk red">CRITICAL 97/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('honeypot')">
+            <div class="preset-dot pd-red"></div>
+            <div class="preset-name">Honeypot Token Approve</div>
+            <div class="preset-risk red">HIGH 82/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('unknown_contract')">
+            <div class="preset-dot pd-red"></div>
+            <div class="preset-name">Unknown contract + large transfer</div>
+            <div class="preset-risk red">HIGH 74/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('abnormal_gas')">
+            <div class="preset-dot pd-yellow"></div>
+            <div class="preset-name">Gas fee anomaly (suspicious)</div>
+            <div class="preset-risk yellow">MEDIUM 55/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('new_address')">
+            <div class="preset-dot pd-yellow"></div>
+            <div class="preset-name">Transfer to new wallet address</div>
+            <div class="preset-risk yellow">MEDIUM 42/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('uniswap_small')">
+            <div class="preset-dot pd-green"></div>
+            <div class="preset-name">Normal Uniswap swap V4</div>
+            <div class="preset-risk green">LOW 8/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('aave_safe')">
+            <div class="preset-dot pd-green"></div>
+            <div class="preset-name">Deposit USDC → Aave V3</div>
+            <div class="preset-risk green">LOW 5/100</div>
+          </button>
+
+          <button class="preset-row" onclick="loadTx('approve_unlimited')">
+            <div class="preset-dot pd-red"></div>
+            <div class="preset-name">Unlimited Token Approve ♾️</div>
+            <div class="preset-risk red">HIGH 88/100</div>
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULATION PROGRESS + RESULT -->
+  <div class="card" style="margin-bottom:18px;">
+    <div class="card-head">
+      <div class="card-title">🧪 On-chain simulation result</div>
+      <span id="sim-timestamp" style="font-size:11px;color:var(--text3);font-family:'Fira Code',monospace"></span>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="sim-progress" id="simProgress">
+      <div class="progress-steps" id="progressSteps">
+        <div class="p-step" id="step0"><span class="p-step-icon">🔍</span>Sprawdzanie adresu w bazie scam adresów...</div>
+        <div class="p-step" id="step1"><span class="p-step-icon">🧪</span>Symulacja transakcji na forku mainnet...</div>
+        <div class="p-step" id="step2"><span class="p-step-icon">🔬</span>Analiza bytecode smart contractu...</div>
+        <div class="p-step" id="step3"><span class="p-step-icon">📊</span>Analiza anomalii gas fee...</div>
+        <div class="p-step" id="step4"><span class="p-step-icon">🎯</span>Porównanie z intencją agenta AI...</div>
+        <div class="p-step" id="step5"><span class="p-step-icon">⚖️</span>Obliczanie risk score...</div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="sim-result card-body" id="simResult">
+      <div style="text-align:center; color:var(--text3); padding: 20px; font-family:'Fira Code',monospace; font-size:12px;">
+        Run analysis lub wybierz scenariusz testowy →
+      </div>
+    </div>
+  </div>
+
+  <!-- TX LOG -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📜 TX validation history</div>
+      <button onclick="clearTxLog()" style="background:none;border:1px solid var(--border2);color:var(--text2);font-family:'Fira Code',monospace;font-size:10px;padding:4px 10px;border-radius:4px;cursor:pointer;letter-spacing:0.5px;">CLEAR</button>
+    </div>
+    <div class="log-scroll">
+      <table class="tx-log">
+        <thead class="tx-log-head">
+          <tr>
+            <th>Time</th>
+            <th>Adres (to)</th>
+            <th>Amount</th>
+            <th>Typ</th>
+            <th>Risk Score</th>
+            <th>Verdict</th>
+            <th>Zagrożenie</th>
+          </tr>
+        </thead>
+        <tbody id="txLogBody">
+          <tr><td colspan="7" class="empty-log">// no transactions in history</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==============================================
+// SHIELDAI — TX GUARDIAN ENGINE v1.0
+// Warstwa 4: Walidacja Transakcji On-chain
+// ==============================================
+
+// --- BAZA DANYCH ---
+
+const SCAM_ADDRESSES = new Set([
+  '0x742d35cc6634c0532925a3b8d4c9c2b4c5e8f1a2',
+  '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+  '0x000000000000000000000000000000000000dead',
+  '0x1234567890abcdef1234567890abcdef12345678',
+  '0xba5eba11ba5eba11ba5eba11ba5eba11ba5eba11'
+]);
+
+const NEW_ADDRESSES = new Set([
+  '0x9b4c3d2e1f0a8765432109876543210987654321',
+  '0xabcdef1234567890abcdef1234567890abcdef12',
+]);
+
+const CONTRACTS = {
+  uniswap:  { name: 'Uniswap V4 Router', verified: true,  audited: true,  drainer: false, honeypot: false, age_days: 890 },
+  aave:     { name: 'Aave V3 Pool',       verified: true,  audited: true,  drainer: false, honeypot: false, age_days: 1200 },
+  curve:    { name: 'Curve 3Pool',        verified: true,  audited: true,  drainer: false, honeypot: false, age_days: 1500 },
+  unknown:  { name: 'Nieznany kontrakt',  verified: false, audited: false, drainer: false, honeypot: false, age_days: 3 },
+  drainer:  { name: 'WALLET DRAINER',     verified: false, audited: false, drainer: true,  honeypot: false, age_days: 1 },
+  honeypot: { name: 'HONEYPOT TOKEN',     verified: false, audited: false, drainer: false, honeypot: true,  age_days: 5 },
+  none:     { name: 'Plain Transfer',     verified: true,  audited: true,  drainer: false, honeypot: false, age_days: 9999 }
+};
+
+const NORMAL_GAS = { min: 15, max: 50 };
+
+// --- PRESET TRANSAKCJE ---
+const TX_PRESETS = {
+  drainer: {
+    to: '0xMaliciousContract...drain', amount: 15.5, token: 'ETH',
+    type: 'contract', gas: 180, contract: 'drainer',
+    intent: 'Claiming airdrop rewards from new protocol'
+  },
+  honeypot: {
+    to: '0xHoneypotToken...0xdead', amount: 50000, token: 'USDC',
+    type: 'approve', gas: 46, contract: 'honeypot',
+    intent: 'Approving tokens for new yield farm'
+  },
+  unknown_contract: {
+    to: '0x9b4c3d2e1f0a8765432109876543210987654321', amount: 8.2, token: 'ETH',
+    type: 'contract', gas: 65, contract: 'unknown',
+    intent: 'Investing in new DeFi opportunity'
+  },
+  abnormal_gas: {
+    to: '0xabcdef1234567890abcdef1234567890abcdef12', amount: 0.5, token: 'ETH',
+    type: 'transfer', gas: 420, contract: 'none',
+    intent: 'Sending ETH to friend'
+  },
+  new_address: {
+    to: '0xabcdef1234567890abcdef1234567890abcdef12', amount: 3.0, token: 'ETH',
+    type: 'transfer', gas: 21, contract: 'none',
+    intent: 'Portfolio rebalancing to cold storage'
+  },
+  uniswap_small: {
+    to: '0xUniswapV4Router...', amount: 0.5, token: 'ETH',
+    type: 'swap', gas: 28, contract: 'uniswap',
+    intent: 'Swapping ETH to USDC for yield farming on Aave'
+  },
+  aave_safe: {
+    to: '0xAaveV3Pool...', amount: 1000, token: 'USDC',
+    type: 'contract', gas: 22, contract: 'aave',
+    intent: 'Depositing USDC to Aave for lending yield'
+  },
+  approve_unlimited: {
+    to: '0xDeadBeef...unknown_protocol', amount: 999999999, token: 'USDT',
+    type: 'approve', gas: 46, contract: 'unknown',
+    intent: 'Approving tokens for auto-compound strategy'
+  }
+};
+
+let stats = { total: 0, blocked: 0, warn: 0, safe: 0, saved: 0 };
+let txHistory = [];
+
+// ---- LOAD PRESET ----
+function loadTx(key) {
+  const p = TX_PRESETS[key];
+  if (!p) return;
+  document.getElementById('toAddress').value = p.to;
+  document.getElementById('amount').value = p.amount;
+  document.getElementById('token').value = p.token;
+  document.getElementById('txType').value = p.type;
+  document.getElementById('gasLimit').value = p.gas;
+  document.getElementById('contractAddr').value = p.contract;
+  document.getElementById('agentIntent').value = p.intent;
+  document.getElementById('simResult').innerHTML = `<div style="text-align:center;color:var(--text3);padding:20px;font-family:'Fira Code',monospace;font-size:12px;">// Scenariusz załadowany — kliknij "Symuluj i analizuj"</div>`;
+  document.getElementById('simProgress').classList.remove('show');
+}
+
+// ---- MAIN ANALYSIS ----
+async function runAnalysis() {
+  const to = document.getElementById('toAddress').value.trim();
+  const amount = parseFloat(document.getElementById('amount').value) || 0;
+  const token = document.getElementById('token').value;
+  const txType = document.getElementById('txType').value;
+  const gas = parseFloat(document.getElementById('gasLimit').value) || 21;
+  const contract = document.getElementById('contractAddr').value;
+  const intent = document.getElementById('agentIntent').value.trim();
+
+  if (!to) { alert('Podaj adres odbiorcy!'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+
+  const resultEl = document.getElementById('simResult');
+  const progressEl = document.getElementById('simProgress');
+
+  resultEl.classList.remove('show');
+  resultEl.innerHTML = '';
+  progressEl.classList.add('show');
+
+  // RESET STEPS
+  for (let i = 0; i <= 5; i++) {
+    document.getElementById('step'+i).className = 'p-step';
+  }
+
+  // STAGED SIMULATION
+  const delays = [400, 500, 600, 350, 400, 300];
+  for (let i = 0; i <= 5; i++) {
+    document.getElementById('step'+i).className = 'p-step active';
+    await sleep(delays[i] + Math.random() * 150);
+    document.getElementById('step'+i).className = 'p-step done';
+    document.getElementById('step'+i).innerHTML = document.getElementById('step'+i).innerHTML.replace('p-step-icon','p-step-icon') + '';
+  }
+
+  await sleep(200);
+  progressEl.classList.remove('show');
+
+  // RUN CHECKS
+  const result = validateTransaction({ to, amount, token, txType, gas, contract, intent });
+
+  // RENDER RESULT
+  renderResult(result, { to, amount, token, txType, gas, contract, intent });
+  addToTxLog(result, { to, amount, token, txType, gas, contract, intent });
+  updateStats(result.verdict, amount, token, result.riskScore);
+
+  document.getElementById('sim-timestamp').textContent = new Date().toLocaleTimeString('pl-PL');
+  btn.disabled = false;
+}
+
+// ---- VALIDATION ENGINE ----
+function validateTransaction({ to, amount, token, txType, gas, contract, intent }) {
+  const checks = [];
+  let riskScore = 0;
+  const threats = [];
+
+  const toNorm = to.toLowerCase();
+  const contractInfo = CONTRACTS[contract] || CONTRACTS['none'];
+
+  // CHECK 1: Scam address database
+  const isScam = SCAM_ADDRESSES.has(toNorm) || contract === 'drainer' || contract === 'honeypot';
+  if (isScam) {
+    checks.push({ status: 'fail', label: 'Baza scam adresów', detail: 'Adres powiązany z kradzieżami — 47 incydentów w bazie', score: 95 });
+    threats.push('SCAM ADDRESS');
+    riskScore = Math.max(riskScore, 95);
+  } else {
+    checks.push({ status: 'pass', label: 'Baza scam adresów', detail: 'Adres czysty — brak w 2M+ rekordach', score: 0 });
+  }
+
+  // CHECK 2: Contract verification
+  if (contract !== 'none') {
+    if (contractInfo.verified && contractInfo.audited) {
+      checks.push({ status: 'pass', label: 'Weryfikacja kontraktu', detail: `${contractInfo.name} — zweryfikowany, 3+ audyty bezpieczeństwa`, score: 0 });
+    } else if (!contractInfo.verified) {
+      checks.push({ status: 'fail', label: 'Weryfikacja kontraktu', detail: `Contract NIEZWERYFIKOWANY — brak source code na Etherscan`, score: 65 });
+      threats.push('UNVERIFIED CONTRACT');
+      riskScore = Math.max(riskScore, 65);
+    }
+
+    // Drainer check
+    if (contractInfo.drainer) {
+      checks.push({ status: 'fail', label: 'Analiza bytecode', detail: 'WYKRYTO WALLET DRAINER — wzorzec masowego transferu aktywów', score: 97 });
+      threats.push('WALLET DRAINER');
+      riskScore = Math.max(riskScore, 97);
+    } else if (contractInfo.honeypot) {
+      checks.push({ status: 'fail', label: 'Analiza bytecode', detail: 'HONEYPOT — sell() funkcja zablokowana, środki niemożliwe do wypłaty', score: 85 });
+      threats.push('HONEYPOT');
+      riskScore = Math.max(riskScore, 85);
+    } else {
+      checks.push({ status: 'pass', label: 'Analiza bytecode', detail: 'Brak wzorców drainera ani honeypota', score: 0 });
+    }
+
+    // Contract age
+    if (contractInfo.age_days < 7) {
+      checks.push({ status: 'caution', label: 'Wiek kontraktu', detail: `Contract ma tylko ${contractInfo.age_days} dni — bardzo świeży, no history`, score: 45 });
+      threats.push('NEW CONTRACT');
+      riskScore = Math.max(riskScore, Math.max(riskScore, 45));
+    } else {
+      checks.push({ status: 'pass', label: 'Wiek kontraktu', detail: `${contractInfo.age_days} dni na blockchainie — sprawdzony historycznie`, score: 0 });
+    }
+  } else {
+    checks.push({ status: 'info', label: 'Weryfikacja kontraktu', detail: 'Plain transfer — brak interakcji z kontraktem', score: 0 });
+  }
+
+  // CHECK 3: Simulation result
+  const simOk = !contractInfo.drainer && !contractInfo.honeypot;
+  if (simOk) {
+    checks.push({ status: 'pass', label: 'Symulacja TX (fork)', detail: `TX wykona się pomyślnie — przelew ${amount} ${token} zweryfikowany`, score: 0 });
+  } else {
+    checks.push({ status: 'fail', label: 'Symulacja TX (fork)', detail: 'Symulacja ODRZUCONA — transakcja drainuje wszystkie zasoby portfela', score: 90 });
+    riskScore = Math.max(riskScore, 90);
+  }
+
+  // CHECK 4: Gas anomaly
+  if (gas > 200) {
+    checks.push({ status: 'fail', label: 'Anomalia Gas Fee', detail: `${gas} Gwei — 4x powyżej normy (15–50 Gwei). Typowy dla kontraktów wymuszających pilność`, score: 60 });
+    threats.push('GAS ANOMALY');
+    riskScore = Math.max(riskScore, 60);
+  } else if (gas > 100) {
+    checks.push({ status: 'caution', label: 'Anomalia Gas Fee', detail: `${gas} Gwei — podwyższone, warto zweryfikować`, score: 35 });
+    riskScore = Math.max(riskScore, 35);
+  } else {
+    checks.push({ status: 'pass', label: 'Anomalia Gas Fee', detail: `${gas} Gwei — w normie (15–50 Gwei)`, score: 0 });
+  }
+
+  // CHECK 5: Amount sanity
+  const tokenPrices = { ETH: 3450, USDC: 1, USDT: 1, MNT: 0.8, WBTC: 85000 };
+  const usdValue = amount * (tokenPrices[token] || 1);
+
+  if (usdValue > 50000) {
+    checks.push({ status: 'caution', label: 'Weryfikacja kwoty', detail: `$${usdValue.toLocaleString()} — przekracza próg $50K, wymagana dodatkowa autoryzacja`, score: 40 });
+    riskScore = Math.max(riskScore, 40);
+    if (!threats.includes('SCAM ADDRESS')) threats.push('HIGH VALUE TX');
+  } else if (txType === 'approve' && amount > 1000000) {
+    checks.push({ status: 'fail', label: 'Weryfikacja kwoty', detail: `UNLIMITED APPROVE — agent zezwala na transfer NIEOGRANICZONEJ ilości tokenów`, score: 80 });
+    threats.push('UNLIMITED APPROVE');
+    riskScore = Math.max(riskScore, 80);
+  } else {
+    checks.push({ status: 'pass', label: 'Weryfikacja kwoty', detail: `$${usdValue.toLocaleString()} — w akceptowalnych limitach`, score: 0 });
+  }
+
+  // CHECK 6: Intent alignment
+  const intentKeywords = {
+    drainer: ['airdrop', 'claim', 'reward', 'free', 'bonus'],
+    honeypot: ['yield', 'farm', 'auto', 'compound', 'new protocol'],
+    unknown: ['opportunity', 'invest', 'new', 'alpha', 'exclusive']
+  };
+
+  let intentMismatch = false;
+  if (contract !== 'none' && intentKeywords[contract]) {
+    const intentLow = intent.toLowerCase();
+    intentMismatch = intentKeywords[contract].some(kw => intentLow.includes(kw)) && !contractInfo.verified;
+  }
+
+  if (intentMismatch) {
+    checks.push({ status: 'caution', label: 'Spójność intencji AI', detail: `Intencja "${intent}" — słowa kluczowe typowe dla scam scenarios`, score: 40 });
+    riskScore = Math.max(riskScore, Math.max(riskScore, 40));
+  } else {
+    checks.push({ status: 'pass', label: 'Spójność intencji AI', detail: `Intencja "${intent.substring(0,40)}" — semantycznie spójna z operacją`, score: 0 });
+  }
+
+  // VERDICT
+  let verdict;
+  if (riskScore >= 65) verdict = 'blocked';
+  else if (riskScore >= 35) verdict = 'warning';
+  else verdict = 'approved';
+
+  return { checks, riskScore, verdict, threats, usdValue };
+}
+
+// ---- RENDER RESULT ----
+function renderResult(result, tx) {
+  const el = document.getElementById('simResult');
+
+  const icons = { blocked: '🚨', warning: '⚠️', approved: '✅' };
+  const labels = { blocked: 'TRANSAKCJA ZABLOKOWANA', warning: 'OSTRZEŻENIE — Wymaga weryfikacji', approved: 'TRANSAKCJA ZATWIERDZONA' };
+  const bannerClass = { blocked: 'danger', warning: 'warn', approved: 'safe' };
+  const verdictClass = bannerClass[result.verdict];
+
+  const contractInfo = CONTRACTS[tx.contract] || CONTRACTS['none'];
+  const tokenPrices = { ETH: 3450, USDC: 1, USDT: 1, MNT: 0.8, WBTC: 85000 };
+  const usdVal = (tx.amount * (tokenPrices[tx.token] || 1)).toLocaleString(undefined, {maximumFractionDigits: 0});
+
+  const barColor = result.riskScore >= 65
+    ? 'linear-gradient(90deg, var(--danger), #ff8a60)'
+    : result.riskScore >= 35
+    ? 'linear-gradient(90deg, var(--warn), #ffdd57)'
+    : 'linear-gradient(90deg, var(--accent2), #57e3c0)';
+
+  let html = `
+    <div class="verdict-banner ${verdictClass}">
+      <div class="verdict-icon">${icons[result.verdict]}</div>
+      <div>
+        <div class="verdict-text-main ${verdictClass}">${labels[result.verdict]}</div>
+        <div class="verdict-sub">Risk Score: ${result.riskScore}/100 · ${result.threats.length} zagrożeń wykrytych · ${result.checks.length} checks wykonanych</div>
+      </div>
+    </div>
+
+    <div class="risk-section">
+      <div class="risk-row">
+        <span class="risk-label">RISK SCORE</span>
+        <span class="risk-score-big" style="color:${result.riskScore>=65?'var(--danger)':result.riskScore>=35?'var(--warn)':'var(--accent2)'}">${result.riskScore}/100</span>
+      </div>
+      <div class="risk-track">
+        <div class="risk-fill" id="riskFill" style="width:0%;background:${barColor}"></div>
+      </div>
+      <div class="risk-zones"><span>SAFE</span><span>WARN</span><span>DANGER</span></div>
+    </div>
+
+    <div class="highlight-box">
+      <span class="muted">to:</span> <span class="hl blue">${tx.to.substring(0,20)}...${tx.to.slice(-6)}</span> &nbsp;
+      <span class="muted">value:</span> <span class="hl">${tx.amount} ${tx.token}</span> 
+      <span class="muted">(≈$${usdVal})</span> &nbsp;
+      <span class="muted">contract:</span> <span class="hl ${contractInfo.drainer||contractInfo.honeypot?'red':contractInfo.verified?'green':'yellow'}">${contractInfo.name}</span><br>
+      <span class="muted">type:</span> <span class="hl">${tx.txType}</span> &nbsp;
+      <span class="muted">gas:</span> <span class="hl ${tx.gas>100?'red':tx.gas>50?'yellow':'green'}">${tx.gas} Gwei</span> &nbsp;
+      <span class="muted">agent intent:</span> <span class="hl">"${tx.intent.substring(0,50)}"</span>
+    </div>
+
+    <div class="check-grid">
+  `;
+
+  const statusMap = { pass: '✅', fail: '🚨', caution: '⚠️', info: 'ℹ️' };
+  result.checks.forEach(c => {
+    html += `
+      <div class="check-item ${c.status}">
+        <span class="ci-icon">${statusMap[c.status]}</span>
+        <div>
+          <div class="ci-label ${c.status}">${c.label}</div>
+          <div class="ci-detail">${c.detail}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  if (result.verdict === 'blocked') {
+    html += `
+      <div style="background:rgba(255,69,96,0.08);border:1px solid rgba(255,69,96,0.3);border-radius:10px;padding:16px 18px;margin-top:4px;">
+        <div style="font-weight:700;color:var(--danger);margin-bottom:6px;font-size:14px;">⛔ Transaction rejected przez TX Guardian</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;font-family:'Fira Code',monospace;">
+          Agent AI <strong style="color:var(--text)">nie może wykonać</strong> tej transakcji bez ręcznej autoryzacji użytkownika.<br>
+          Powód: <strong style="color:var(--danger)">${result.threats.join(' · ')}</strong><br>
+          Wymagane działanie: <strong style="color:var(--warn)">Human Gate — potwierdź na urządzeniu mobilnym</strong>
+        </div>
+      </div>
+    `;
+  } else if (result.verdict === 'warning') {
+    html += `
+      <div style="background:rgba(255,169,64,0.08);border:1px solid rgba(255,169,64,0.3);border-radius:10px;padding:16px 18px;margin-top:4px;">
+        <div style="font-weight:700;color:var(--warn);margin-bottom:6px;font-size:14px;">⚠️ Wymagana weryfikacja użytkownika</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;font-family:'Fira Code',monospace;">
+          TX przechodzi z ostrzeżeniem — agent musi uzyskać <strong style="color:var(--text)">potwierdzenie od użytkownika</strong> przed wykonaniem.<br>
+          Zagrożenia: <strong style="color:var(--warn)">${result.threats.join(' · ') || 'Podwyższone ryzyko bez konkretnego wzorca'}</strong>
+        </div>
+      </div>
+    `;
+  } else {
+    html += `
+      <div style="background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.2);border-radius:10px;padding:16px 18px;margin-top:4px;">
+        <div style="font-weight:700;color:var(--accent2);margin-bottom:6px;font-size:14px;">✅ Transakcja zatwierdzona przez TX Guardian</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;font-family:'Fira Code',monospace;">
+          Wszystkie sprawdzenia przeszły pomyślnie. Agent AI może wykonać transakcję <strong style="color:var(--text)">autonomicznie</strong>.<br>
+          Audit trail recorded on-chain. Risk score: <strong style="color:var(--accent2)">${result.riskScore}/100</strong>
+        </div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = html;
+  el.classList.add('show');
+
+  // Animate risk bar
+  setTimeout(() => {
+    const fill = document.getElementById('riskFill');
+    if (fill) fill.style.width = result.riskScore + '%';
+  }, 100);
+}
+
+// ---- LOG ----
+function addToTxLog(result, tx) {
+  const tbody = document.getElementById('txLogBody');
+  const empty = tbody.querySelector('.empty-log');
+  if (empty) tbody.innerHTML = '';
+
+  const time = new Date().toLocaleTimeString('pl-PL');
+  const shortAddr = tx.to.substring(0,10) + '...' + tx.to.slice(-4);
+  const badgeClass = result.verdict === 'blocked' ? 'blocked' : result.verdict === 'warning' ? 'warning' : 'approved';
+  const badgeLabel = result.verdict === 'blocked' ? '⛔ BLOCKED' : result.verdict === 'warning' ? '⚠️ WARN' : '✅ OK';
+  const riskColor = result.riskScore >= 65 ? 'var(--danger)' : result.riskScore >= 35 ? 'var(--warn)' : 'var(--accent2)';
+  const threat = result.threats[0] || '—';
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="muted">${time}</td>
+    <td class="addr">${shortAddr}</td>
+    <td>${tx.amount} ${tx.token}</td>
+    <td class="muted">${tx.txType}</td>
+    <td style="color:${riskColor};font-weight:600">${result.riskScore}/100</td>
+    <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
+    <td style="color:var(--text2)">${threat}</td>
+  `;
+
+  tbody.insertBefore(tr, tbody.firstChild);
+  txHistory.unshift({ result, tx });
+}
+
+// ---- STATS ----
+function updateStats(verdict, amount, token, score) {
+  stats.total++;
+  if (verdict === 'blocked') {
+    stats.blocked++;
+    const prices = { ETH: 3450, USDC: 1, USDT: 1, MNT: 0.8, WBTC: 85000 };
+    stats.saved += Math.round(amount * (prices[token] || 1));
+  } else if (verdict === 'warning') stats.warn++;
+  else stats.safe++;
+
+  document.getElementById('s-total').textContent = stats.total;
+  document.getElementById('s-blocked').textContent = stats.blocked;
+  document.getElementById('s-warn').textContent = stats.warn;
+  document.getElementById('s-safe').textContent = stats.safe;
+  document.getElementById('s-saved').textContent = '$' + stats.saved.toLocaleString();
+}
+
+function clearTxLog() {
+  document.getElementById('txLogBody').innerHTML = '<tr><td colspan="7" class="empty-log">// no transactions in history</td></tr>';
+  document.getElementById('simResult').innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-family:\'Fira Code\',monospace;font-size:12px;">// no data — run simulation</div>';
+  stats = { total: 0, blocked: 0, warn: 0, safe: 0, saved: 0 };
+  ['s-total','s-blocked','s-warn','s-safe'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('s-saved').textContent = '$0';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

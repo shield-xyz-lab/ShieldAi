@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldAI — Agent Watchdog Layer 5</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #030608;
+    --s1: #070b10;
+    --s2: #0b1018;
+    --s3: #0f1520;
+    --b1: #161f2e;
+    --b2: #1d2a3d;
+    --b3: #243348;
+    --lime: #84cc16;
+    --sky: #38bdf8;
+    --violet: #7c3aed;
+    --rose: #fb7185;
+    --amber: #fbbf24;
+    --emerald: #10b981;
+    --text: #c8d6e8;
+    --t2: #5a7394;
+    --t3: #2a3d52;
+    --glime: rgba(132,204,22,0.1);
+    --gsky: rgba(56,189,248,0.1);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 55% 35% at 5% 0%, rgba(132,204,22,0.04) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 30% at 95% 100%, rgba(56,189,248,0.04) 0%, transparent 55%);
+  }
+
+  .wrap { max-width:1300px; margin:0 auto; padding:22px 26px; position:relative; z-index:1; }
+
+  /* NAV */
+  nav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:20px; border-bottom:1px solid var(--b1); margin-bottom:24px;
+  }
+
+  .brand { display:flex; align-items:center; gap:14px; }
+
+  .logo-wrap {
+    width:46px; height:46px; border-radius:12px; position:relative;
+    background:linear-gradient(135deg, rgba(132,204,22,0.12), rgba(56,189,248,0.08));
+    border:1px solid var(--b3); display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+
+  .logo-pulse {
+    position:absolute; inset:-3px; border-radius:14px;
+    border:1px solid rgba(132,204,22,0.2);
+    animation:radar 3s ease-in-out infinite;
+  }
+
+  @keyframes radar {
+    0%,100% { opacity:0.3; transform:scale(1); }
+    50% { opacity:1; transform:scale(1.08); box-shadow:0 0 20px rgba(132,204,22,0.2); }
+  }
+
+  .brand-name {
+    font-size:20px; font-weight:800; letter-spacing:-0.4px;
+    background:linear-gradient(135deg, #e2e8f0 30%, var(--lime));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+
+  .brand-mono { font-family:'Azeret Mono',monospace; font-size:11px; color:var(--t3); margin-top:2px; letter-spacing:0.8px; }
+
+  .nav-right { display:flex; gap:10px; align-items:center; }
+
+  .chip {
+    display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:20px;
+    font-family:'Azeret Mono',monospace; font-size:11px;
+  }
+  .chip.watching { background:rgba(132,204,22,0.08); border:1px solid rgba(132,204,22,0.2); color:var(--lime); }
+  .chip.live { background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.2); color:var(--sky); }
+
+  .cdot { width:6px; height:6px; border-radius:50%; animation:bp 1.5s ease-in-out infinite; }
+  .chip.watching .cdot { background:var(--lime); }
+  .chip.live .cdot { background:var(--sky); }
+  @keyframes bp { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* STATS */
+  .stats { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:22px; }
+
+  .stat {
+    background:var(--s1); border:1px solid var(--b1); border-radius:10px;
+    padding:14px 15px; position:relative; overflow:hidden;
+  }
+
+  .stat-bar { position:absolute; top:0; left:0; right:0; height:2px; }
+  .stat-l { font-family:'Azeret Mono',monospace; font-size:10px; color:var(--t2); letter-spacing:1.2px; text-transform:uppercase; margin-bottom:5px; }
+  .stat-v { font-size:24px; font-weight:800; }
+  .lv { color:var(--lime); }
+  .sv { color:var(--sky); }
+  .rv { color:var(--rose); }
+  .av { color:var(--amber); }
+  .ev { color:var(--emerald); }
+  .vv { color:var(--violet); }
+  .stat-h { font-family:'Azeret Mono',monospace; font-size:10px; color:var(--t3); margin-top:3px; }
+
+  /* LAYOUT */
+  .layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .layout3 { display:grid; grid-template-columns:1.6fr 1fr; gap:16px; margin-bottom:16px; }
+  .fw { grid-column:1/-1; }
+
+  .card { background:var(--s1); border:1px solid var(--b1); border-radius:12px; overflow:hidden; }
+  .card-head {
+    padding:13px 18px; border-bottom:1px solid var(--b1); background:var(--s2);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .card-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--t2); display:flex; align-items:center; gap:8px; }
+  .card-body { padding:18px; }
+
+  /* LIVE FEED */
+  .live-feed { max-height:280px; overflow-y:auto; }
+
+  .event-row {
+    display:grid; grid-template-columns:55px 90px 1fr 80px 90px;
+    gap:10px; align-items:center; padding:9px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.03);
+    font-family:'Azeret Mono',monospace; font-size:11px;
+    transition:background 0.15s; animation:slideR 0.3s ease;
+  }
+
+  @keyframes slideR { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+
+  .event-row:hover { background:rgba(255,255,255,0.02); }
+  .event-row.header { color:var(--t3); font-size:10px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid var(--b1); animation:none; }
+  .event-row.anomaly { background:rgba(251,113,133,0.04); border-left:2px solid var(--rose); }
+  .event-row.warning { background:rgba(251,191,36,0.03); border-left:2px solid var(--amber); }
+  .event-row.normal { border-left:2px solid transparent; }
+
+  .ev-time { color:var(--t2); }
+  .ev-type { }
+  .ev-type.normal { color:var(--sky); }
+  .ev-type.anomaly { color:var(--rose); font-weight:600; }
+  .ev-type.warning { color:var(--amber); }
+  .ev-desc { color:var(--t2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ev-score { font-weight:700; text-align:right; }
+  .ev-status { text-align:right; }
+
+  .badge { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; }
+  .badge.ok { background:rgba(16,185,129,0.1); color:var(--emerald); border:1px solid rgba(16,185,129,0.2); }
+  .badge.warn { background:rgba(251,191,36,0.1); color:var(--amber); border:1px solid rgba(251,191,36,0.2); }
+  .badge.alert { background:rgba(251,113,133,0.12); color:var(--rose); border:1px solid rgba(251,113,133,0.25); }
+  .badge.frozen { background:rgba(124,58,237,0.12); color:var(--violet); border:1px solid rgba(124,58,237,0.25); }
+
+  /* BEHAVIOR PROFILE */
+  .profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .profile-item {
+    background:var(--s2); border:1px solid var(--b1); border-radius:8px; padding:12px 14px;
+  }
+
+  .profile-label { font-family:'Azeret Mono',monospace; font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .profile-baseline { font-size:12px; color:var(--t2); font-family:'Azeret Mono',monospace; margin-bottom:4px; }
+  .profile-baseline span { color:var(--lime); font-weight:600; }
+  .profile-current { font-size:12px; font-family:'Azeret Mono',monospace; }
+  .profile-current span { font-weight:700; }
+  .profile-current.normal span { color:var(--emerald); }
+  .profile-current.warn span { color:var(--amber); }
+  .profile-current.anomaly span { color:var(--rose); }
+
+  .profile-bar-wrap { margin-top:7px; height:4px; background:var(--b1); border-radius:2px; overflow:hidden; }
+  .profile-bar { height:100%; border-radius:2px; transition:width 0.5s ease; }
+
+  /* ANOMALY SCORE METER */
+  .score-meter { position:relative; }
+
+  .score-ring {
+    width:120px; height:120px; margin:0 auto 12px;
+    position:relative; display:flex; align-items:center; justify-content:center;
+  }
+
+  .score-ring svg { position:absolute; inset:0; transform:rotate(-90deg); }
+  .score-ring-bg { fill:none; stroke:var(--b2); stroke-width:8; }
+  .score-ring-fill { fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s cubic-bezier(0.34,1.56,0.64,1); }
+
+  .score-center { text-align:center; z-index:1; }
+  .score-big { font-size:28px; font-weight:800; }
+  .score-label { font-family:'Azeret Mono',monospace; font-size:10px; color:var(--t2); }
+
+  /* SIMULATION CONTROLS */
+  .sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  .sim-btn {
+    padding:10px 12px; background:var(--s2); border:1px solid var(--b1);
+    border-radius:8px; color:var(--text); font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:12px; cursor:pointer; text-align:left; transition:all 0.2s; line-height:1.5;
+  }
+  .sim-btn:hover { border-color:var(--lime); background:rgba(132,204,22,0.04); }
+
+  .stag { display:inline-block; padding:2px 7px; border-radius:4px; font-size:9px; letter-spacing:0.8px; text-transform:uppercase; font-family:'Azeret Mono',monospace; margin-bottom:4px; }
+  .stag.red { background:rgba(251,113,133,0.14); color:var(--rose); }
+  .stag.amber { background:rgba(251,191,36,0.12); color:var(--amber); }
+  .stag.green { background:rgba(16,185,129,0.1); color:var(--emerald); }
+
+  /* ALERT BOX */
+  .alert-box {
+    border-radius:10px; padding:14px 16px; margin-bottom:12px;
+    display:flex; gap:12px; align-items:flex-start;
+    animation:flash-in 0.4s ease;
+  }
+  @keyframes flash-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .alert-box.critical { background:rgba(251,113,133,0.08); border:1px solid rgba(251,113,133,0.3); }
+  .alert-box.warn { background:rgba(251,191,36,0.07); border:1px solid rgba(251,191,36,0.25); }
+  .alert-box.info { background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.2); }
+
+  .alert-icon { font-size:22px; flex-shrink:0; }
+  .alert-title { font-size:14px; font-weight:700; margin-bottom:3px; }
+  .alert-title.critical { color:var(--rose); }
+  .alert-title.warn { color:var(--amber); }
+  .alert-title.info { color:var(--sky); }
+  .alert-desc { font-size:12px; color:var(--t2); line-height:1.6; font-family:'Azeret Mono',monospace; }
+
+  /* AGENT STATUS */
+  .agent-status {
+    display:flex; align-items:center; gap:10px; padding:12px 14px;
+    border-radius:8px; font-size:13px; font-weight:600; margin-bottom:14px;
+    transition:all 0.4s;
+  }
+  .agent-status.running { background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.2); color:var(--emerald); }
+  .agent-status.paused { background:rgba(251,191,36,0.07); border:1px solid rgba(251,191,36,0.2); color:var(--amber); }
+  .agent-status.frozen { background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.25); color:var(--violet); }
+  .agent-status.alert { background:rgba(251,113,133,0.08); border:1px solid rgba(251,113,133,0.3); color:var(--rose); }
+
+  .status-dot-big { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .running .status-dot-big { background:var(--emerald); animation:bp 1.5s ease-in-out infinite; }
+  .paused .status-dot-big { background:var(--amber); }
+  .frozen .status-dot-big { background:var(--violet); }
+  .alert .status-dot-big { background:var(--rose); animation:bp 0.5s ease-in-out infinite; }
+
+  /* ACTION BUTTONS */
+  .action-row { display:flex; gap:8px; }
+  .act-btn {
+    flex:1; padding:9px 10px; border-radius:7px; font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; border:1px solid;
+  }
+  .act-btn.freeze { background:rgba(124,58,237,0.12); border-color:rgba(124,58,237,0.3); color:var(--violet); }
+  .act-btn.freeze:hover { background:rgba(124,58,237,0.22); box-shadow:0 0 15px rgba(124,58,237,0.2); }
+  .act-btn.resume { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:var(--emerald); }
+  .act-btn.resume:hover { background:rgba(16,185,129,0.2); }
+  .act-btn.reset { background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.2); color:var(--sky); }
+  .act-btn.reset:hover { background:rgba(56,189,248,0.15); }
+
+  /* CHART AREA */
+  .chart-wrap { position:relative; height:120px; }
+  canvas { width:100% !important; }
+
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--b3); border-radius:2px; }
+
+  .divider { height:1px; background:var(--b1); margin:14px 0; }
+  .mono { font-family:'Azeret Mono',monospace; }
+  .muted { color:var(--t2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- NAV -->
+  <nav>
+    <div class="brand">
+      <div class="logo-wrap">
+        <div class="logo-pulse"></div>
+        👁️
+      </div>
+      <div>
+        <div class="brand-name">ShieldAI — Agent Watchdog</div>
+        <div class="brand-mono">// Layer 5 · Behavioral Anomaly Detection · Real-time Monitoring</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="chip watching"><div class="cdot"></div>WATCHDOG ACTIVE</div>
+      <div class="chip live"><div class="cdot"></div>30s scan cycle</div>
+    </div>
+  </nav>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--lime),transparent)"></div>
+      <div class="stat-l">Monitored actions</div>
+      <div class="stat-v lv" id="s-actions">0</div>
+      <div class="stat-h">since watchdog start</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--rose),transparent)"></div>
+      <div class="stat-l">Anomalies</div>
+      <div class="stat-v rv" id="s-anomalies">0</div>
+      <div class="stat-h">detected patterns</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--amber),transparent)"></div>
+      <div class="stat-l">Warnings</div>
+      <div class="stat-v av" id="s-warnings">0</div>
+      <div class="stat-h">near threshold</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--violet),transparent)"></div>
+      <div class="stat-l">Freezes</div>
+      <div class="stat-v vv" id="s-freezes">0</div>
+      <div class="stat-h">agent stopped</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--sky),transparent)"></div>
+      <div class="stat-l">Anomaly Score</div>
+      <div class="stat-v sv" id="s-score">0</div>
+      <div class="stat-h">current level</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--emerald),transparent)"></div>
+      <div class="stat-l">Agent status</div>
+      <div class="stat-v ev" id="s-status" style="font-size:14px;padding-top:4px;">RUNNING</div>
+      <div class="stat-h">watchdog verdict</div>
+    </div>
+  </div>
+
+  <div class="layout3">
+
+    <!-- LEFT: LIVE FEED + CHART -->
+    <div>
+      <!-- AGENT STATUS BAR -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:14px 18px;">
+          <div class="agent-status running" id="agentStatus">
+            <div class="status-dot-big"></div>
+            <span id="agentStatusText">Agent RUNNING — behavior within baseline — watchdog monitoring</span>
+          </div>
+          <div class="action-row">
+            <button class="act-btn freeze" onclick="forceFreeze()">🧊 Freeze agent</button>
+            <button class="act-btn resume" onclick="resumeAgent()">▶️ Resume agent</button>
+            <button class="act-btn reset" onclick="resetBaseline()">🔄 Reset baseline</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE EVENT FEED -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-title">📡 Live Event Stream <span id="liveIndicator" style="width:6px;height:6px;background:var(--lime);border-radius:50%;display:inline-block;animation:bp 1s infinite;margin-left:4px;"></span></div>
+          <span class="mono" style="font-size:11px;color:var(--t3)" id="eventCount">0 eventów</span>
+        </div>
+        <div class="event-row header">
+          <span>Time</span>
+          <span>Typ</span>
+          <span>Opis akcji</span>
+          <span style="text-align:right">Score</span>
+          <span style="text-align:right">Status</span>
+        </div>
+        <div class="live-feed" id="liveFeed">
+          <div style="padding:20px;text-align:center;color:var(--t3);font-family:'Azeret Mono',monospace;font-size:11px;">
+            // Waiting for agent activity...
+          </div>
+        </div>
+      </div>
+
+      <!-- ANOMALY SCORE CHART -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📈 Anomaly Score — history</div>
+          <span class="mono" style="font-size:11px;color:var(--t3)">last 20 events</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-wrap">
+            <canvas id="scoreChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CONTROLS -->
+    <div>
+
+      <!-- ANOMALY METER -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-title">🎯 Anomaly Score Meter</div>
+        </div>
+        <div class="card-body" style="text-align:center;">
+          <div class="score-ring">
+            <svg viewBox="0 0 120 120">
+              <circle class="score-ring-bg" cx="60" cy="60" r="52"/>
+              <circle class="score-ring-fill" id="scoreRingFill" cx="60" cy="60" r="52"
+                stroke="var(--lime)" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-big lv" id="scoreBig">0</div>
+              <div class="score-label">/ 100</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;font-family:'Azeret Mono',monospace;font-size:10px;color:var(--t2);margin-bottom:14px;">
+            <span style="color:var(--emerald)">■ 0-30 SAFE</span>
+            <span style="color:var(--amber)">■ 31-65 WARN</span>
+            <span style="color:var(--rose)">■ 66+ ALERT</span>
+          </div>
+          <div id="activeAlerts"></div>
+        </div>
+      </div>
+
+      <!-- BEHAVIOR PROFILE -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-title">📊 Behavioral Baseline</div>
+          <span class="mono" style="font-size:10px;color:var(--t3)">learned pattern</span>
+        </div>
+        <div class="card-body">
+          <div class="profile-grid" id="profileGrid"></div>
+        </div>
+      </div>
+
+      <!-- SIMULATION BUTTONS -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">⚡ Behavior simulator</div>
+        </div>
+        <div class="card-body">
+          <div class="sim-grid">
+            <button class="sim-btn" onclick="simulate('normal_swap')">
+              <div class="stag green">🟢 Normal</div><br>Standard swap on Uniswap
+            </button>
+            <button class="sim-btn" onclick="simulate('normal_read')">
+              <div class="stag green">🟢 Normal</div><br>Reading prices and yield rates
+            </button>
+            <button class="sim-btn" onclick="simulate('freq_spike')">
+              <div class="stag amber">🟡 Anomalia</div><br>Sudden TX frequency spike
+            </button>
+            <button class="sim-btn" onclick="simulate('new_contract')">
+              <div class="stag amber">🟡 Anomalia</div><br>Interaction with new contract
+            </button>
+            <button class="sim-btn" onclick="simulate('amount_spike')">
+              <div class="stag red">🔴 Krytyczne</div><br>10x amount limit breach
+            </button>
+            <button class="sim-btn" onclick="simulate('burst_attack')">
+              <div class="stag red">🔴 Krytyczne</div><br>Seria suspicious TX (atak)
+            </button>
+            <button class="sim-btn" onclick="simulate('off_hours')">
+              <div class="stag amber">🟡 Anomalia</div><br>Activity outside normal window
+            </button>
+            <button class="sim-btn" onclick="simulate('drain_pattern')">
+              <div class="stag red">🔴 Krytyczne</div><br>Wallet draining pattern
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==============================================
+// SHIELDAI — AGENT WATCHDOG ENGINE v1.0
+// Warstwa 5: Behavioral Anomaly Detection
+// ==============================================
+
+// --- BEHAVIORAL BASELINE (learned normal) ---
+const BASELINE = {
+  tx_per_minute:     { normal: 2,      warn: 8,     alert: 15,    label: 'TX / minutę',      unit: 'tx/min' },
+  avg_tx_amount_eth: { normal: 1.2,    warn: 5.0,   alert: 10.0,  label: 'Avg TX amount',     unit: 'ETH' },
+  unique_contracts:  { normal: 3,      warn: 8,     alert: 15,    label: 'New contracts',    unit: 'szt' },
+  external_calls:    { normal: 1,      warn: 5,     alert: 10,    label: 'Ext. calls',    unit: '/min' },
+  gas_multiplier:    { normal: 1.0,    warn: 3.0,   alert: 6.0,   label: 'Gas multiplier',       unit: 'x norm' },
+  idle_breaks:       { normal: 5,      warn: 1,     alert: 0,     label: 'Idle breaks',      unit: '/h' },
+};
+
+// --- STATE ---
+let anomalyScore = 0;
+let agentFrozen = false;
+let stats = { actions: 0, anomalies: 0, warnings: 0, freezes: 0 };
+let scoreHistory = [];
+let currentMetrics = { tx_per_minute: 2, avg_tx_amount_eth: 1.2, unique_contracts: 3, external_calls: 1, gas_multiplier: 1.0, idle_breaks: 5 };
+let eventCount = 0;
+
+// --- SIMULATE SCENARIOS ---
+const SCENARIOS = {
+  normal_swap: {
+    type: 'normal',
+    events: [
+      { desc: 'SWAP 0.8 ETH → USDC via Uniswap V4', score_delta: -2, metric_changes: { avg_tx_amount_eth: 0.8, tx_per_minute: 2 } },
+      { desc: 'READ Uniswap V4 pool liquidity', score_delta: -1, metric_changes: {} },
+    ]
+  },
+  normal_read: {
+    type: 'normal',
+    events: [
+      { desc: 'READ ETH/USDC price oracle', score_delta: -1, metric_changes: {} },
+      { desc: 'READ Aave V3 yield rates', score_delta: -1, metric_changes: {} },
+    ]
+  },
+  freq_spike: {
+    type: 'warning',
+    events: [
+      { desc: 'TX #1 — rapid succession detected', score_delta: 12, metric_changes: { tx_per_minute: 11 } },
+      { desc: 'TX #2 — frequency 5x above baseline', score_delta: 14, metric_changes: { tx_per_minute: 13 } },
+      { desc: 'TX #3 — unusual burst pattern continues', score_delta: 10, metric_changes: { tx_per_minute: 14 } },
+    ]
+  },
+  new_contract: {
+    type: 'warning',
+    events: [
+      { desc: 'CALL unknown contract 0xNewProtocol... (age: 2 days)', score_delta: 18, metric_changes: { unique_contracts: 9, external_calls: 6 } },
+      { desc: 'APPROVE tokens for unverified contract', score_delta: 22, metric_changes: { unique_contracts: 11 } },
+    ]
+  },
+  amount_spike: {
+    type: 'anomaly',
+    events: [
+      { desc: 'TRANSFER 12.5 ETH — 10x normal avg (1.2 ETH)', score_delta: 30, metric_changes: { avg_tx_amount_eth: 12.5 } },
+      { desc: 'TRANSFER 8.3 ETH — second large tx in window', score_delta: 25, metric_changes: { avg_tx_amount_eth: 10.4 } },
+    ]
+  },
+  burst_attack: {
+    type: 'anomaly',
+    events: [
+      { desc: 'BURST: 18 TX in 60s — far above normal (2/min)', score_delta: 35, metric_changes: { tx_per_minute: 18, gas_multiplier: 4.2 } },
+      { desc: 'BURST: External data source injected commands', score_delta: 20, metric_changes: { external_calls: 12 } },
+      { desc: 'BURST: New contracts 14x this session', score_delta: 18, metric_changes: { unique_contracts: 14 } },
+    ]
+  },
+  off_hours: {
+    type: 'warning',
+    events: [
+      { desc: 'ACTIVITY at 03:47 UTC — outside normal 08-22 window', score_delta: 20, metric_changes: { idle_breaks: 0 } },
+      { desc: 'TRANSFER initiated during off-hours period', score_delta: 15, metric_changes: { tx_per_minute: 6 } },
+    ]
+  },
+  drain_pattern: {
+    type: 'anomaly',
+    events: [
+      { desc: 'DRAIN PATTERN: 3 consecutive max-amount transfers', score_delta: 40, metric_changes: { avg_tx_amount_eth: 14.8, tx_per_minute: 8 } },
+      { desc: 'DRAIN: All funds moving to single new address', score_delta: 35, metric_changes: { external_calls: 9, unique_contracts: 12 } },
+      { desc: 'DRAIN: Gas 7x normal — urgency manipulation', score_delta: 28, metric_changes: { gas_multiplier: 7.2 } },
+    ]
+  }
+};
+
+// --- SIMULATE ---
+async function simulate(key) {
+  if (agentFrozen && key !== 'normal_swap' && key !== 'normal_read') {
+    addEvent('⛔', 'FROZEN', 'Agent zamrożony — akcja zablokowana przez watchdog', 0, 'frozen');
+    return;
+  }
+
+  const scenario = SCENARIOS[key];
+  if (!scenario) return;
+
+  for (let i = 0; i < scenario.events.length; i++) {
+    const ev = scenario.events[i];
+    await sleep(i * 350);
+
+    // Update metrics
+    Object.assign(currentMetrics, ev.metric_changes);
+
+    // Update anomaly score
+    anomalyScore = Math.max(0, Math.min(100, anomalyScore + ev.score_delta));
+    scoreHistory.push(anomalyScore);
+    if (scoreHistory.length > 20) scoreHistory.shift();
+
+    stats.actions++;
+    const evType = scenario.type;
+
+    if (ev.score_delta > 0) {
+      if (anomalyScore >= 66) stats.anomalies++;
+      else if (anomalyScore >= 31) stats.warnings++;
+    }
+
+    addEvent(
+      evType === 'normal' ? '→' : evType === 'warning' ? '⚠' : '🚨',
+      evType === 'normal' ? 'NORMAL' : evType === 'warning' ? 'WARNING' : 'ANOMALY',
+      ev.desc,
+      anomalyScore,
+      evType === 'normal' ? 'normal' : evType === 'warning' ? 'warning' : 'anomaly'
+    );
+
+    updateScoreMeter();
+    updateProfileGrid();
+    updateStatsBar();
+    drawChart();
+
+    // Auto-freeze on critical
+    if (anomalyScore >= 85 && !agentFrozen) {
+      await sleep(200);
+      autoFreeze();
+    }
+  }
+}
+
+// --- ADD EVENT TO FEED ---
+function addEvent(icon, type, desc, score, cssClass) {
+  const feed = document.getElementById('liveFeed');
+  const empty = feed.querySelector('div[style]');
+  if (empty) feed.innerHTML = '';
+
+  eventCount++;
+  document.getElementById('eventCount').textContent = eventCount + ' eventów';
+
+  const time = new Date().toLocaleTimeString('pl-PL');
+  const scoreColor = score >= 66 ? 'var(--rose)' : score >= 31 ? 'var(--amber)' : 'var(--emerald)';
+  const badgeCls = score >= 66 ? 'alert' : score >= 31 ? 'warn' : 'ok';
+  const badgeLabel = score >= 66 ? '⚠ ALERT' : score >= 31 ? '~ WARN' : '✓ OK';
+
+  const row = document.createElement('div');
+  row.className = `event-row ${cssClass}`;
+  row.innerHTML = `
+    <span class="ev-time">${time}</span>
+    <span class="ev-type ${cssClass}">${type}</span>
+    <span class="ev-desc">${icon} ${desc}</span>
+    <span class="ev-score" style="color:${scoreColor}">${score}</span>
+    <span class="ev-status"><span class="badge ${badgeCls}">${badgeLabel}</span></span>
+  `;
+
+  feed.insertBefore(row, feed.firstChild);
+}
+
+// --- UPDATE SCORE METER ---
+function updateScoreMeter() {
+  const score = anomalyScore;
+  document.getElementById('scoreBig').textContent = score;
+  document.getElementById('s-score').textContent = score;
+
+  const circumference = 326.7;
+  const offset = circumference - (score / 100) * circumference;
+  const fill = document.getElementById('scoreRingFill');
+  fill.style.strokeDashoffset = offset;
+
+  const color = score >= 66 ? 'var(--rose)' : score >= 31 ? 'var(--amber)' : 'var(--lime)';
+  fill.style.stroke = color;
+  document.getElementById('scoreBig').style.color = color;
+
+  // Active alerts
+  const alerts = document.getElementById('activeAlerts');
+  alerts.innerHTML = '';
+
+  if (score >= 85) {
+    alerts.innerHTML += `<div class="alert-box critical"><div class="alert-icon">🚨</div><div><div class="alert-title critical">AGENT ZAMROŻONY</div><div class="alert-desc">Anomaly score krytyczny. Wszystkie transakcje wstrzymane.</div></div></div>`;
+  } else if (score >= 66) {
+    alerts.innerHTML += `<div class="alert-box warn"><div class="alert-icon">⚠️</div><div><div class="alert-title warn">Wysokie ryzyko anomalii</div><div class="alert-desc">Zachowanie agenta odbiega od baseline. Monitorowanie wzmożone.</div></div></div>`;
+  } else if (score >= 31) {
+    alerts.innerHTML += `<div class="alert-box info"><div class="alert-icon">ℹ️</div><div><div class="alert-title info">Wzorzec poza normą</div><div class="alert-desc">Kilka wskaźników powyżej baseline — obserwuj dalej.</div></div></div>`;
+  } else {
+    alerts.innerHTML = `<div style="text-align:center;color:var(--t3);font-family:'Azeret Mono',monospace;font-size:11px;padding:8px;">✓ Zachowanie w normie</div>`;
+  }
+
+  // Update agent status
+  updateAgentStatus();
+}
+
+// --- UPDATE AGENT STATUS ---
+function updateAgentStatus() {
+  const el = document.getElementById('agentStatus');
+  const txt = document.getElementById('agentStatusText');
+  const statEl = document.getElementById('s-status');
+
+  if (agentFrozen) {
+    el.className = 'agent-status frozen';
+    txt.textContent = '🧊 Agent FROZEN by Watchdog — transactions suspended pending human verification';
+    statEl.textContent = 'FROZEN';
+    statEl.style.color = 'var(--violet)';
+  } else if (anomalyScore >= 66) {
+    el.className = 'agent-status alert';
+    txt.textContent = '🚨 Agent ALERT — critical anomaly score, watchdog heightened surveillance';
+    statEl.textContent = 'ALERT';
+    statEl.style.color = 'var(--rose)';
+  } else if (anomalyScore >= 31) {
+    el.className = 'agent-status paused';
+    txt.textContent = '⚠️ Agent WARNING — patterns outside baseline, every TX requires additional validation';
+    statEl.textContent = 'WARN';
+    statEl.style.color = 'var(--amber)';
+  } else {
+    el.className = 'agent-status running';
+    txt.textContent = '✅ Agent RUNNING — behavior within baseline — watchdog monitoring 30s cycle';
+    statEl.textContent = 'RUNNING';
+    statEl.style.color = 'var(--emerald)';
+  }
+}
+
+// --- PROFILE GRID ---
+function updateProfileGrid() {
+  const el = document.getElementById('profileGrid');
+  el.innerHTML = Object.entries(BASELINE).map(([key, b]) => {
+    const current = currentMetrics[key] ?? b.normal;
+    const isWarn = key === 'idle_breaks'
+      ? current <= b.warn
+      : current >= b.warn;
+    const isAlert = key === 'idle_breaks'
+      ? current <= b.alert
+      : current >= b.alert;
+
+    const cssClass = isAlert ? 'anomaly' : isWarn ? 'warn' : 'normal';
+    const barPct = key === 'idle_breaks'
+      ? Math.round((1 - current / b.normal) * 100)
+      : Math.min(100, Math.round((current / b.alert) * 100));
+    const barColor = isAlert ? 'var(--rose)' : isWarn ? 'var(--amber)' : 'var(--lime)';
+
+    return `
+      <div class="profile-item">
+        <div class="profile-label">${b.label}</div>
+        <div class="profile-baseline">Baseline: <span>${b.normal} ${b.unit}</span></div>
+        <div class="profile-current ${cssClass}">Currently: <span>${current} ${b.unit}</span></div>
+        <div class="profile-bar-wrap">
+          <div class="profile-bar" style="width:${barPct}%;background:${barColor}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- CHART ---
+function drawChart() {
+  const canvas = document.getElementById('scoreChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.offsetWidth;
+  const H = 120;
+  canvas.width = W;
+  canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+
+  if (scoreHistory.length < 2) return;
+
+  const data = scoreHistory;
+  const step = W / (data.length - 1);
+  const pad = 10;
+
+  // Grid lines
+  [30, 65].forEach(lvl => {
+    const y = H - pad - ((lvl / 100) * (H - pad * 2));
+    ctx.beginPath();
+    ctx.strokeStyle = lvl === 30 ? 'rgba(251,191,36,0.15)' : 'rgba(251,113,133,0.15)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1;
+    ctx.moveTo(0, y); ctx.lineTo(W, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  const lastScore = data[data.length - 1];
+  const topColor = lastScore >= 66 ? 'rgba(251,113,133,0.3)' : lastScore >= 31 ? 'rgba(251,191,36,0.25)' : 'rgba(132,204,22,0.25)';
+  grad.addColorStop(0, topColor);
+  grad.addColorStop(1, 'transparent');
+
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = i * step;
+    const y = H - pad - ((d / 100) * (H - pad * 2));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo((data.length - 1) * step, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  const lineColor = lastScore >= 66 ? '#fb7185' : lastScore >= 31 ? '#fbbf24' : '#84cc16';
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = i * step;
+    const y = H - pad - ((d / 100) * (H - pad * 2));
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Last point dot
+  const lx = (data.length - 1) * step;
+  const ly = H - pad - ((lastScore / 100) * (H - pad * 2));
+  ctx.beginPath();
+  ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+  ctx.fillStyle = lineColor;
+  ctx.fill();
+  ctx.strokeStyle = 'var(--bg)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+// --- ACTIONS ---
+function autoFreeze() {
+  agentFrozen = true;
+  stats.freezes++;
+  updateStatsBar();
+  addEvent('🧊', 'FROZEN', 'AUTO-FREEZE: Anomaly score exceeded 85 — agent stopped automatycznie', anomalyScore, 'anomaly');
+  updateAgentStatus();
+}
+
+function forceFreeze() {
+  if (agentFrozen) return;
+  agentFrozen = true;
+  stats.freezes++;
+  updateStatsBar();
+  addEvent('🧊', 'FROZEN', 'MANUAL FREEZE: Operator manually froze agent', anomalyScore, 'anomaly');
+  updateAgentStatus();
+}
+
+function resumeAgent() {
+  agentFrozen = false;
+  anomalyScore = Math.max(0, anomalyScore - 30);
+  scoreHistory.push(anomalyScore);
+  addEvent('▶', 'RESUME', 'Agent resumed by operator — anomaly score reduced', anomalyScore, 'normal');
+  updateScoreMeter();
+  updateStatsBar();
+  drawChart();
+}
+
+function resetBaseline() {
+  anomalyScore = 0;
+  agentFrozen = false;
+  scoreHistory = [];
+  Object.assign(currentMetrics, { tx_per_minute: 2, avg_tx_amount_eth: 1.2, unique_contracts: 3, external_calls: 1, gas_multiplier: 1.0, idle_breaks: 5 });
+  updateScoreMeter();
+  updateProfileGrid();
+  drawChart();
+  addEvent('🔄', 'RESET', 'Baseline reset — measurements from scratch', 0, 'normal');
+}
+
+// --- STATS ---
+function updateStatsBar() {
+  document.getElementById('s-actions').textContent = stats.actions;
+  document.getElementById('s-anomalies').textContent = stats.anomalies;
+  document.getElementById('s-warnings').textContent = stats.warnings;
+  document.getElementById('s-freezes').textContent = stats.freezes;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// INIT
+updateProfileGrid();
+updateScoreMeter();
+drawChart();
+window.addEventListener('resize', drawChart);
+</script>
+</body>
+</html>

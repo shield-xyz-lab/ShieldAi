@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldAI — Human Gate Layer 6</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --bg: #020406;
+    --s1: #060a0f;
+    --s2: #0a1018;
+    --s3: #0e1620;
+    --b1: #152030;
+    --b2: #1c2d42;
+    --b3: #253850;
+    --gold: #f0b429;
+    --gold2: #ffd166;
+    --blue: #3b82f6;
+    --green: #22c55e;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --text: #c8d8e8;
+    --t2: #567090;
+    --t3: #263848;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Geist', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(240,180,41,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 100%, rgba(59,130,246,0.04) 0%, transparent 55%);
+  }
+
+  .wrap { max-width:1280px; margin:0 auto; padding:22px 26px; position:relative; z-index:1; }
+
+  /* NAV */
+  nav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:20px; border-bottom:1px solid var(--b1); margin-bottom:24px;
+  }
+
+  .brand { display:flex; align-items:center; gap:14px; }
+
+  .logo {
+    width:46px; height:46px; border-radius:12px;
+    background:linear-gradient(135deg, rgba(240,180,41,0.15), rgba(59,130,246,0.08));
+    border:1px solid var(--b3); display:flex; align-items:center; justify-content:center; font-size:22px;
+    box-shadow: 0 0 24px rgba(240,180,41,0.12);
+  }
+
+  .brand-name {
+    font-size:20px; font-weight:800; letter-spacing:-0.4px;
+    background:linear-gradient(135deg, #e8eef4 30%, var(--gold));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+
+  .brand-mono { font-family:'Geist Mono',monospace; font-size:11px; color:var(--t3); margin-top:2px; letter-spacing:0.8px; }
+
+  .nav-chips { display:flex; gap:10px; }
+
+  .chip {
+    display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:20px;
+    font-family:'Geist Mono',monospace; font-size:11px;
+  }
+  .chip.gold { background:rgba(240,180,41,0.08); border:1px solid rgba(240,180,41,0.22); color:var(--gold); }
+  .chip.blue { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); color:var(--blue); }
+
+  .cdot { width:6px; height:6px; border-radius:50%; animation:bdot 2s ease-in-out infinite; }
+  .chip.gold .cdot { background:var(--gold); }
+  .chip.blue .cdot { background:var(--blue); animation:none; }
+  @keyframes bdot { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* STATS */
+  .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:22px; }
+
+  .stat {
+    background:var(--s1); border:1px solid var(--b1); border-radius:10px;
+    padding:14px 16px; position:relative; overflow:hidden;
+  }
+
+  .stat-bar { position:absolute; top:0; left:0; right:0; height:2px; }
+  .stat-l { font-family:'Geist Mono',monospace; font-size:10px; color:var(--t2); letter-spacing:1.3px; text-transform:uppercase; margin-bottom:5px; }
+  .stat-v { font-size:26px; font-weight:800; }
+  .gv { color:var(--gold); }
+  .bv { color:var(--blue); }
+  .grv { color:var(--green); }
+  .rv { color:var(--red); }
+  .pv { color:var(--purple); }
+  .stat-h { font-family:'Geist Mono',monospace; font-size:10px; color:var(--t3); margin-top:3px; }
+
+  /* MAIN LAYOUT */
+  .layout { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+  .layout3 { display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:18px; margin-bottom:18px; }
+
+  .card { background:var(--s1); border:1px solid var(--b1); border-radius:12px; overflow:hidden; }
+  .card-head {
+    padding:13px 18px; border-bottom:1px solid var(--b1); background:var(--s2);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .card-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--t2); display:flex; align-items:center; gap:8px; }
+  .card-body { padding:18px; }
+
+  /* ===== PHONE MOCKUP ===== */
+  .phone-outer {
+    width:220px; margin:0 auto;
+    background:linear-gradient(160deg, #1a2535 0%, #0d1520 100%);
+    border-radius:36px;
+    border:2px solid var(--b3);
+    padding:14px 10px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04),
+      0 30px 80px rgba(0,0,0,0.6),
+      0 0 40px rgba(240,180,41,0.08);
+    position:relative;
+  }
+
+  .phone-notch {
+    width:70px; height:6px; background:var(--b3); border-radius:3px;
+    margin:0 auto 12px; position:relative;
+  }
+
+  .phone-notch::before {
+    content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:8px; height:8px; border-radius:50%; background:var(--b2);
+    border:1px solid var(--b3);
+  }
+
+  .phone-screen {
+    background:var(--bg); border-radius:24px; overflow:hidden;
+    min-height:380px; position:relative;
+  }
+
+  .phone-status-bar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 14px 4px; font-family:'Geist Mono',monospace; font-size:9px; color:var(--t2);
+  }
+
+  .phone-app-header {
+    background:linear-gradient(135deg, rgba(240,180,41,0.12), rgba(59,130,246,0.06));
+    border-bottom:1px solid var(--b1); padding:12px 14px; text-align:center;
+  }
+
+  .phone-app-name { font-size:13px; font-weight:700; color:var(--gold); letter-spacing:0.3px; }
+  .phone-app-sub { font-family:'Geist Mono',monospace; font-size:9px; color:var(--t2); margin-top:2px; }
+
+  .phone-content { padding:12px; }
+
+  /* NOTIFICATION */
+  .push-notif {
+    background:var(--s2); border:1px solid var(--b2); border-radius:12px;
+    padding:12px; margin-bottom:10px; position:relative; overflow:hidden;
+    animation:notifIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes notifIn {
+    from { opacity:0; transform:translateY(-20px) scale(0.95); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .push-notif::before {
+    content:''; position:absolute; top:0; left:0; bottom:0; width:3px;
+    background:var(--gold);
+  }
+
+  .notif-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-left:8px; }
+  .notif-app { font-size:10px; font-weight:700; color:var(--gold); font-family:'Geist Mono',monospace; letter-spacing:0.5px; }
+  .notif-time { font-size:9px; color:var(--t2); font-family:'Geist Mono',monospace; }
+
+  .notif-title { font-size:12px; font-weight:700; color:var(--text); margin-bottom:4px; padding-left:8px; }
+  .notif-body { font-size:10px; color:var(--t2); line-height:1.5; padding-left:8px; font-family:'Geist Mono',monospace; }
+
+  /* TX CARD ON PHONE */
+  .phone-tx-card {
+    background:var(--s3); border:1px solid var(--b2); border-radius:10px;
+    padding:11px; margin-bottom:10px;
+  }
+
+  .phone-tx-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .phone-tx-title { font-size:11px; font-weight:700; color:var(--text); }
+  .phone-risk-badge { font-size:9px; font-weight:700; padding:2px 7px; border-radius:4px; font-family:'Geist Mono',monospace; }
+  .phone-risk-badge.low { background:rgba(34,197,94,0.15); color:var(--green); }
+  .phone-risk-badge.med { background:rgba(240,180,41,0.15); color:var(--gold); }
+  .phone-risk-badge.high { background:rgba(239,68,68,0.15); color:var(--red); }
+
+  .phone-tx-row { display:flex; justify-content:space-between; margin-bottom:4px; font-size:10px; }
+  .phone-tx-label { color:var(--t2); font-family:'Geist Mono',monospace; }
+  .phone-tx-val { color:var(--text); font-weight:600; font-family:'Geist Mono',monospace; }
+  .phone-tx-val.good { color:var(--green); }
+  .phone-tx-val.warn { color:var(--gold); }
+  .phone-tx-val.bad { color:var(--red); }
+
+  /* BIOMETRIC PROMPT */
+  .biometric-area {
+    text-align:center; padding:10px 0;
+    display:none;
+  }
+
+  .biometric-area.show { display:block; animation:fadeUp 0.3s ease; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .biometric-ring {
+    width:56px; height:56px; border-radius:50%; margin:0 auto 8px;
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    border:2px solid var(--b2); background:var(--s2);
+    transition:all 0.3s;
+  }
+
+  .biometric-ring.scanning {
+    border-color:var(--gold); animation:bioscan 1.5s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(240,180,41,0.3);
+  }
+
+  .biometric-ring.approved { border-color:var(--green); box-shadow:0 0 20px rgba(34,197,94,0.4); animation:none; }
+  .biometric-ring.rejected { border-color:var(--red); box-shadow:0 0 20px rgba(239,68,68,0.3); animation:none; }
+
+  @keyframes bioscan {
+    0%,100% { box-shadow:0 0 10px rgba(240,180,41,0.2); transform:scale(1); }
+    50% { box-shadow:0 0 30px rgba(240,180,41,0.5); transform:scale(1.05); }
+  }
+
+  .bio-text { font-size:10px; color:var(--t2); font-family:'Geist Mono',monospace; }
+
+  /* PHONE ACTION BTNS */
+  .phone-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+
+  .phone-btn {
+    padding:9px 6px; border-radius:8px; font-size:11px; font-weight:700;
+    cursor:pointer; transition:all 0.2s; border:1px solid; text-align:center;
+    font-family:'Geist',sans-serif;
+  }
+
+  .phone-btn.approve {
+    background:rgba(34,197,94,0.15); border-color:rgba(34,197,94,0.35); color:var(--green);
+  }
+  .phone-btn.approve:hover { background:rgba(34,197,94,0.25); box-shadow:0 0 15px rgba(34,197,94,0.2); }
+
+  .phone-btn.reject {
+    background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.3); color:var(--red);
+  }
+  .phone-btn.reject:hover { background:rgba(239,68,68,0.22); box-shadow:0 0 15px rgba(239,68,68,0.2); }
+
+  /* DECISION RESULT */
+  .decision-result {
+    text-align:center; padding:14px 12px; display:none;
+    animation:fadeUp 0.35s ease;
+  }
+  .decision-result.show { display:block; }
+
+  .decision-icon { font-size:32px; margin-bottom:8px; }
+  .decision-label { font-size:13px; font-weight:800; margin-bottom:4px; }
+  .decision-label.approved { color:var(--green); }
+  .decision-label.rejected { color:var(--red); }
+  .decision-sub { font-size:10px; color:var(--t2); font-family:'Geist Mono',monospace; line-height:1.5; }
+
+  /* ===== RIGHT PANEL ===== */
+  .field { margin-bottom:12px; }
+  .field label { display:block; font-family:'Geist Mono',monospace; font-size:10px; color:var(--t2); letter-spacing:1.2px; text-transform:uppercase; margin-bottom:6px; }
+
+  input, select {
+    width:100%; background:var(--s3); border:1px solid var(--b2);
+    border-radius:7px; color:var(--text); font-family:'Geist Mono',monospace;
+    font-size:12px; padding:10px 12px; outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus, select:focus { border-color:var(--gold); box-shadow:0 0 0 2px rgba(240,180,41,0.08); }
+  select option { background:var(--s3); }
+
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .send-btn {
+    width:100%; padding:13px; border-radius:8px; font-family:'Geist',sans-serif;
+    font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s;
+    background:linear-gradient(135deg, rgba(240,180,41,0.2), rgba(59,130,246,0.1));
+    border:1px solid rgba(240,180,41,0.4); color:#fff; margin-top:4px;
+  }
+  .send-btn:hover { background:linear-gradient(135deg, rgba(240,180,41,0.32), rgba(59,130,246,0.18)); box-shadow:0 0 24px rgba(240,180,41,0.2); transform:translateY(-1px); }
+  .send-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+  /* QUEUE */
+  .queue-list { display:flex; flex-direction:column; gap:8px; max-height:320px; overflow-y:auto; }
+
+  .queue-item {
+    background:var(--s2); border:1px solid var(--b1); border-radius:9px;
+    padding:11px 13px; position:relative; overflow:hidden;
+    transition:all 0.3s; animation:qIn 0.3s ease;
+  }
+
+  @keyframes qIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+
+  .queue-item::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+  }
+
+  .queue-item.pending::before { background:var(--gold); }
+  .queue-item.approved::before { background:var(--green); }
+  .queue-item.rejected::before { background:var(--red); }
+  .queue-item.expired::before { background:var(--t3); }
+
+  .qi-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .qi-amount { font-size:14px; font-weight:800; color:var(--text); }
+  .qi-status { font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; font-family:'Geist Mono',monospace; }
+  .qi-status.pending { background:rgba(240,180,41,0.12); color:var(--gold); border:1px solid rgba(240,180,41,0.25); }
+  .qi-status.approved { background:rgba(34,197,94,0.1); color:var(--green); border:1px solid rgba(34,197,94,0.2); }
+  .qi-status.rejected { background:rgba(239,68,68,0.1); color:var(--red); border:1px solid rgba(239,68,68,0.2); }
+  .qi-status.expired { background:rgba(86,112,144,0.1); color:var(--t2); border:1px solid rgba(86,112,144,0.2); }
+
+  .qi-details { display:flex; gap:12px; font-family:'Geist Mono',monospace; font-size:10px; color:var(--t2); }
+  .qi-timer { font-weight:600; font-family:'Geist Mono',monospace; font-size:11px; }
+  .qi-timer.urgent { color:var(--red); animation:bdot 0.8s ease-in-out infinite; }
+  .qi-timer.ok { color:var(--gold); }
+  .qi-timer.done { color:var(--t3); }
+
+  /* PRESETS */
+  .preset-list { display:flex; flex-direction:column; gap:7px; }
+  .preset-btn {
+    background:var(--s2); border:1px solid var(--b1); border-radius:8px;
+    padding:10px 12px; color:var(--text); font-family:'Geist',sans-serif;
+    font-size:12px; cursor:pointer; text-align:left; transition:all 0.2s; line-height:1.5;
+    width:100%;
+  }
+  .preset-btn:hover { border-color:var(--gold); background:rgba(240,180,41,0.04); }
+
+  .ptag { display:inline-block; padding:2px 7px; border-radius:4px; font-size:9px; letter-spacing:0.8px; text-transform:uppercase; font-family:'Geist Mono',monospace; margin-bottom:4px; }
+  .ptag.red { background:rgba(239,68,68,0.14); color:var(--red); }
+  .ptag.gold { background:rgba(240,180,41,0.12); color:var(--gold); }
+  .ptag.green { background:rgba(34,197,94,0.1); color:var(--green); }
+
+  /* LOG */
+  .log-table { width:100%; border-collapse:collapse; font-size:11px; font-family:'Geist Mono',monospace; }
+  .log-table th { text-align:left; padding:9px 14px; font-size:10px; color:var(--t3); letter-spacing:1.3px; text-transform:uppercase; border-bottom:1px solid var(--b1); }
+  .log-table td { padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .log-table tr:hover td { background:rgba(255,255,255,0.015); }
+  .log-scroll { max-height:180px; overflow-y:auto; }
+
+  .badge { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; }
+  .badge.approved { background:rgba(34,197,94,0.1); color:var(--green); border:1px solid rgba(34,197,94,0.2); }
+  .badge.rejected { background:rgba(239,68,68,0.1); color:var(--red); border:1px solid rgba(239,68,68,0.2); }
+  .badge.expired { background:rgba(86,112,144,0.08); color:var(--t2); border:1px solid rgba(86,112,144,0.15); }
+  .badge.pending { background:rgba(240,180,41,0.1); color:var(--gold); border:1px solid rgba(240,180,41,0.2); }
+
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--b3); border-radius:2px; }
+
+  .muted { color:var(--t2); }
+  .gold { color:var(--gold); }
+  .divider { height:1px; background:var(--b1); margin:14px 0; }
+  .empty-state { padding:20px; text-align:center; color:var(--t3); font-family:'Geist Mono',monospace; font-size:11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- NAV -->
+  <nav>
+    <div class="brand">
+      <div class="logo">🔑</div>
+      <div>
+        <div class="brand-name">ShieldAI — Human Gate</div>
+        <div class="brand-mono">// Layer 6 · Hardware-Attested Human Authorization · Mobile Push</div>
+      </div>
+    </div>
+    <div class="nav-chips">
+      <div class="chip gold"><div class="cdot"></div>Gate ARMED — threshold $10,000</div>
+      <div class="chip blue"><div class="cdot"></div>Push service CONNECTED</div>
+    </div>
+  </nav>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--gold),transparent)"></div>
+      <div class="stat-l">Gate Requests</div>
+      <div class="stat-v gv" id="s-total">0</div>
+      <div class="stat-h">total sent</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--green),transparent)"></div>
+      <div class="stat-l">Approved</div>
+      <div class="stat-v grv" id="s-approved">0</div>
+      <div class="stat-h">by human</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--red),transparent)"></div>
+      <div class="stat-l">Rejected</div>
+      <div class="stat-v rv" id="s-rejected">0</div>
+      <div class="stat-h">blocked by gate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--purple),transparent)"></div>
+      <div class="stat-l">Expired</div>
+      <div class="stat-v pv" id="s-expired">0</div>
+      <div class="stat-h">timeout after 60s</div>
+    </div>
+    <div class="stat">
+      <div class="stat-bar" style="background:linear-gradient(90deg,var(--blue),transparent)"></div>
+      <div class="stat-l">Saved $</div>
+      <div class="stat-v bv" id="s-saved">$0</div>
+      <div class="stat-h">potential losses</div>
+    </div>
+  </div>
+
+  <!-- 3-COLUMN LAYOUT -->
+  <div class="layout3">
+
+    <!-- LEFT: TX BUILDER -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-title">⚡ AI agent transaction</div>
+          <span style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3)">wymaga autoryzacji</span>
+        </div>
+        <div class="card-body">
+
+          <div class="field">
+            <label>Recipient address</label>
+            <input type="text" id="txTo" value="0x742d35Cc...E8f1a2">
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Amount</label>
+              <input type="number" id="txAmount" value="5.8" step="0.1">
+            </div>
+            <div class="field">
+              <label>Token</label>
+              <select id="txToken">
+                <option value="ETH">ETH</option>
+                <option value="USDC">USDC</option>
+                <option value="USDT">USDT</option>
+                <option value="MNT">MNT</option>
+                <option value="WBTC">WBTC</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Agent intent</label>
+            <input type="text" id="txIntent" value="Portfolio rebalancing — Uniswap V4">
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Risk Score (L1-L5)</label>
+              <input type="number" id="txRisk" value="28" min="0" max="100">
+            </div>
+            <div class="field">
+              <label>Contract</label>
+              <select id="txContract">
+                <option value="uniswap">Uniswap V4 ✓</option>
+                <option value="aave">Aave V3 ✓</option>
+                <option value="unknown">Nieznany ⚠️</option>
+                <option value="drainer">Drainer 🚨</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="send-btn" id="sendBtn" onclick="sendToGate()">
+            📲 Send to Human Gate
+          </button>
+        </div>
+      </div>
+
+      <!-- PRESETS -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📋 Example TX</div>
+        </div>
+        <div class="card-body">
+          <div class="preset-list">
+            <button class="preset-btn" onclick="loadTx('large_safe')">
+              <div class="ptag gold">💛 Large TX</div><br>
+              18 ETH → Aave V3, risk 22/100 — requires gate
+            </button>
+            <button class="preset-btn" onclick="loadTx('suspicious')">
+              <div class="ptag red">🔴 Suspicious</div><br>
+              12 ETH → unknown contract, risk 71/100
+            </button>
+            <button class="preset-btn" onclick="loadTx('critical')">
+              <div class="ptag red">🚨 Critical</div><br>
+              DRAINER — agent wants to transfer all ETH
+            </button>
+            <button class="preset-btn" onclick="loadTx('normal_small')">
+              <div class="ptag green">🟢 Below threshold</div><br>
+              0.3 ETH swap — automatic, no gate
+            </button>
+            <button class="preset-btn" onclick="loadTx('usdc_large')">
+              <div class="ptag gold">💛 Large USDC</div><br>
+              50,000 USDC → Curve Finance, risk 15/100
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: PHONE -->
+    <div>
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:1.5px;text-transform:uppercase;">📱 Mobile device simulation</div>
+      </div>
+
+      <div class="phone-outer">
+        <div class="phone-notch"></div>
+        <div class="phone-screen" id="phoneScreen">
+
+          <!-- IDLE STATE -->
+          <div id="phoneIdle">
+            <div class="phone-status-bar">
+              <span>09:41</span>
+              <span>ShieldAI</span>
+              <span>🔋 94%</span>
+            </div>
+            <div class="phone-app-header">
+              <div class="phone-app-name">🔑 ShieldAI Gate</div>
+              <div class="phone-app-sub">Human Authorization Layer</div>
+            </div>
+            <div class="phone-content">
+              <div style="text-align:center;padding:40px 0;color:var(--t3);font-family:'Geist Mono',monospace;font-size:11px;line-height:1.8;">
+                <div style="font-size:28px;margin-bottom:12px;">🛡️</div>
+                Waiting for<br>authorization...<br><br>
+                <span style="font-size:10px;">Threshold: $10,000+</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTIFICATION + APPROVAL STATE -->
+          <div id="phoneActive" style="display:none;">
+            <div class="phone-status-bar">
+              <span id="phoneTime">09:41</span>
+              <span>ShieldAI</span>
+              <span>🔋 94%</span>
+            </div>
+            <div class="phone-app-header">
+              <div class="phone-app-name">🔑 ShieldAI Gate</div>
+              <div class="phone-app-sub">Authorization required!</div>
+            </div>
+            <div class="phone-content">
+
+              <!-- PUSH NOTIFICATION -->
+              <div class="push-notif" id="pushNotif">
+                <div class="notif-header">
+                  <span class="notif-app">🛡️ SHIELDAI</span>
+                  <span class="notif-time" id="notifTime">teraz</span>
+                </div>
+                <div class="notif-title" id="notifTitle">TX authorization required</div>
+                <div class="notif-body" id="notifBody">Agent chce wykonać transakcję powyżej progu $10,000</div>
+              </div>
+
+              <!-- TX DETAILS ON PHONE -->
+              <div class="phone-tx-card" id="phoneTxCard"></div>
+
+              <!-- TIMER -->
+              <div style="text-align:center;margin-bottom:10px;">
+                <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--t2);margin-bottom:4px;">Expires in:</div>
+                <div class="qi-timer" id="phoneTimer" style="font-size:18px;font-weight:800;">60s</div>
+              </div>
+
+              <!-- BIOMETRIC -->
+              <div class="biometric-area" id="bioArea">
+                <div class="biometric-ring" id="bioRing">👆</div>
+                <div class="bio-text" id="bioText">Touch to approve</div>
+              </div>
+
+              <!-- DECISION -->
+              <div class="decision-result" id="decisionResult"></div>
+
+              <!-- BUTTONS -->
+              <div class="phone-actions" id="phoneActions">
+                <button class="phone-btn approve" onclick="humanDecision('approved')">✅ Approve</button>
+                <button class="phone-btn reject" onclick="humanDecision('rejected')">❌ Reject</button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COUNTDOWN BAR -->
+      <div style="margin-top:12px;text-align:center;">
+        <div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--t2);margin-bottom:6px;" id="countdownLabel">—</div>
+        <div style="height:4px;background:var(--b1);border-radius:2px;overflow:hidden;width:220px;margin:0 auto;">
+          <div id="countdownBar" style="height:100%;width:0%;background:var(--gold);border-radius:2px;transition:width 1s linear;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: QUEUE -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-title">⏳ Authorization queue</div>
+          <span id="queueCount" style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3);">0 w kolejce</span>
+        </div>
+        <div class="card-body" style="padding:14px;">
+          <div class="queue-list" id="queueList">
+            <div class="empty-state">// No pending TX</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">🔬 How Human Gate works</div>
+        </div>
+        <div class="card-body" style="font-size:12px;line-height:1.75;color:var(--t2);font-family:'Geist Mono',monospace;">
+          <div style="margin-bottom:10px;"><span style="color:var(--gold)">1. THRESHOLD CHECK</span><br>Every AI agent TX passes through L1–L5. If value ≥ $10K or risk score ≥ 60 → Human Gate.</div>
+          <div style="margin-bottom:10px;"><span style="color:var(--gold)">2. PUSH NOTIFICATION</span><br>Natychmiastowe powiadomienie na urządzenie mobilne z pełnymi detalami TX i wynikiem L1-L5.</div>
+          <div style="margin-bottom:10px;"><span style="color:var(--gold)">3. BIOMETRIC SIGN</span><br>Właściciel fizycznie dotyka ekranu — Face ID / Touch ID tworzy hardware-attested podpis.</div>
+          <div style="margin-bottom:10px;"><span style="color:var(--gold)">4. TIMEOUT = BLOCK</span><br>Brak odpowiedzi w 60 sekund = automatyczne odrzucenie. Agent nigdy nie czeka w nieskończoność.</div>
+          <div><span style="color:var(--gold)">5. AUDIT TRAIL</span><br>Każda decyzja zapisana on-chain z timestampem i kryptograficznym dowodem autoryzacji człowieka.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY LOG -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📜 Human Gate decision history</div>
+      <button onclick="clearLog()" style="background:none;border:1px solid var(--b2);color:var(--t2);font-family:'Geist Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;cursor:pointer;">CLEAR</button>
+    </div>
+    <div class="log-scroll">
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Amount</th>
+            <th>Token</th>
+            <th>Do (adres)</th>
+            <th>Risk L1-L5</th>
+            <th>Decyzja</th>
+            <th>Response time</th>
+          </tr>
+        </thead>
+        <tbody id="logBody">
+          <tr><td colspan="7" class="empty-state">// no history — send TX to gate</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==============================================
+// SHIELDAI — HUMAN GATE ENGINE v1.0
+// Layer 6: Hardware-Attested Human Authorization
+// ==============================================
+
+const TOKEN_PRICES = { ETH:3450, USDC:1, USDT:1, MNT:0.8, WBTC:85000 };
+const THRESHOLD_USD = 10000;
+const TIMEOUT_SEC = 60;
+
+let stats = { total:0, approved:0, rejected:0, expired:0, saved:0 };
+let currentTx = null;
+let timerInterval = null;
+let timerSeconds = 0;
+let queueItems = [];
+
+// PRESETS
+const TX_PRESETS = {
+  large_safe:   { to:'0xAaveV3Pool...', amount:18, token:'ETH', intent:'Deposit ETH to Aave V3 for 3.8% APY yield', risk:22, contract:'aave' },
+  suspicious:   { to:'0x9b4c3d2e...unknown', amount:12, token:'ETH', intent:'Investing in new high-yield opportunity', risk:71, contract:'unknown' },
+  critical:     { to:'0xMalicious...drain', amount:24.5, token:'ETH', intent:'Claiming emergency airdrop rewards', risk:95, contract:'drainer' },
+  normal_small: { to:'0xUniswapV4...', amount:0.3, token:'ETH', intent:'Small portfolio rebalance swap ETH→USDC', risk:8, contract:'uniswap' },
+  usdc_large:   { to:'0xCurveFinance...', amount:50000, token:'USDC', intent:'Adding liquidity to Curve 3pool for yield', risk:15, contract:'aave' },
+};
+
+function loadTx(key) {
+  const p = TX_PRESETS[key];
+  if (!p) return;
+  document.getElementById('txTo').value = p.to;
+  document.getElementById('txAmount').value = p.amount;
+  document.getElementById('txToken').value = p.token;
+  document.getElementById('txIntent').value = p.intent;
+  document.getElementById('txRisk').value = p.risk;
+  document.getElementById('txContract').value = p.contract;
+}
+
+// --- SEND TO GATE ---
+function sendToGate() {
+  const to = document.getElementById('txTo').value.trim();
+  const amount = parseFloat(document.getElementById('txAmount').value) || 0;
+  const token = document.getElementById('txToken').value;
+  const intent = document.getElementById('txIntent').value.trim();
+  const risk = parseInt(document.getElementById('txRisk').value) || 0;
+  const contract = document.getElementById('txContract').value;
+
+  const usdVal = amount * (TOKEN_PRICES[token] || 1);
+
+  // CHECK: below threshold and low risk — auto approve
+  if (usdVal < THRESHOLD_USD && risk < 60) {
+    addToLog({ amount, token, to, risk, decision:'auto-approved', responseTime:'<1s', usdVal });
+    showAutoApprove(amount, token, usdVal);
+    return;
+  }
+
+  // ABOVE THRESHOLD — send to human gate
+  currentTx = { to, amount, token, intent, risk, contract, usdVal, sentAt: Date.now() };
+  stats.total++;
+  updateStats();
+
+  // Show phone active
+  document.getElementById('phoneIdle').style.display = 'none';
+  document.getElementById('phoneActive').style.display = 'block';
+  document.getElementById('decisionResult').classList.remove('show');
+  document.getElementById('phoneActions').style.display = 'grid';
+  document.getElementById('bioArea').classList.remove('show');
+
+  // Update phone content
+  const now = new Date();
+  document.getElementById('phoneTime').textContent = now.toLocaleTimeString('pl-PL', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('notifTime').textContent = 'teraz';
+
+  const riskLevel = risk >= 66 ? 'high' : risk >= 31 ? 'med' : 'low';
+  const riskLabel = risk >= 66 ? '⚠️ HIGH RISK' : risk >= 31 ? '~ MED RISK' : '✓ LOW RISK';
+  const contractNames = { uniswap:'Uniswap V4 ✓', aave:'Aave V3 ✓', unknown:'Nieznany ⚠️', drainer:'DRAINER 🚨' };
+
+  document.getElementById('notifTitle').textContent = risk >= 66 ? '🚨 Ryzykowna TX wymaga weryfikacji!' : '🔑 TX authorization required';
+  document.getElementById('notifBody').textContent = `Agent chce wysłać ${amount} ${token} (≈$${Math.round(usdVal).toLocaleString()})`;
+
+  document.getElementById('phoneTxCard').innerHTML = `
+    <div class="phone-tx-header">
+      <div class="phone-tx-title">Transaction details</div>
+      <div class="phone-risk-badge ${riskLevel}">RISK ${risk}/100</div>
+    </div>
+    <div class="phone-tx-row">
+      <span class="phone-tx-label">Amount:</span>
+      <span class="phone-tx-val">${amount} ${token}</span>
+    </div>
+    <div class="phone-tx-row">
+      <span class="phone-tx-label">Value:</span>
+      <span class="phone-tx-val ${usdVal>50000?'bad':usdVal>20000?'warn':'good'}">≈$${Math.round(usdVal).toLocaleString()}</span>
+    </div>
+    <div class="phone-tx-row">
+      <span class="phone-tx-label">Do:</span>
+      <span class="phone-tx-val">${to.substring(0,16)}...</span>
+    </div>
+    <div class="phone-tx-row">
+      <span class="phone-tx-label">Contract:</span>
+      <span class="phone-tx-val ${contract==='drainer'?'bad':contract==='unknown'?'warn':'good'}">${contractNames[contract]}</span>
+    </div>
+    <div class="phone-tx-row">
+      <span class="phone-tx-label">Intent:</span>
+      <span class="phone-tx-val" style="font-size:9px;">${intent.substring(0,30)}...</span>
+    </div>
+  `;
+
+  // Add to queue
+  addToQueue(currentTx);
+
+  // Start timer
+  startTimer();
+}
+
+// --- TIMER ---
+function startTimer() {
+  clearInterval(timerInterval);
+  timerSeconds = TIMEOUT_SEC;
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimerDisplay();
+
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      handleExpiry();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('phoneTimer');
+  const bar = document.getElementById('countdownBar');
+  const label = document.getElementById('countdownLabel');
+
+  el.textContent = timerSeconds + 's';
+  el.className = 'qi-timer ' + (timerSeconds <= 10 ? 'urgent' : 'ok');
+
+  const pct = (timerSeconds / TIMEOUT_SEC) * 100;
+  bar.style.width = pct + '%';
+  bar.style.background = timerSeconds <= 10 ? 'var(--red)' : timerSeconds <= 25 ? 'var(--amber)' : 'var(--gold)';
+  label.textContent = `Authorization expires in ${timerSeconds}s`;
+
+  // Update queue timer
+  updateQueueTimers();
+}
+
+// --- HUMAN DECISION ---
+function humanDecision(decision) {
+  if (!currentTx) return;
+  clearInterval(timerInterval);
+
+  const responseTime = TIMEOUT_SEC - timerSeconds;
+
+  // Show biometric
+  const bioArea = document.getElementById('bioArea');
+  const bioRing = document.getElementById('bioRing');
+  const bioText = document.getElementById('bioText');
+
+  bioArea.classList.add('show');
+  document.getElementById('phoneActions').style.display = 'none';
+  bioRing.className = 'biometric-ring scanning';
+  bioText.textContent = 'Biometric verification...';
+
+  setTimeout(() => {
+    bioRing.className = 'biometric-ring ' + (decision === 'approved' ? 'approved' : 'rejected');
+    bioRing.textContent = decision === 'approved' ? '✅' : '❌';
+    bioText.textContent = decision === 'approved' ? 'Identity confirmed' : 'Transaction rejected';
+
+    setTimeout(() => {
+      showDecisionResult(decision);
+      processDecision(decision, responseTime + 'ms');
+    }, 600);
+  }, 1200);
+}
+
+function showDecisionResult(decision) {
+  const el = document.getElementById('decisionResult');
+  el.className = 'decision-result show';
+
+  if (decision === 'approved') {
+    el.innerHTML = `
+      <div class="decision-icon">✅</div>
+      <div class="decision-label approved">APPROVED</div>
+      <div class="decision-sub">Biometric authorization confirmed<br>TX forwarded for on-chain execution<br>Audit trail cryptographically recorded</div>
+    `;
+  } else {
+    el.innerHTML = `
+      <div class="decision-icon">🚫</div>
+      <div class="decision-label rejected">REJECTED</div>
+      <div class="decision-sub">TX blocked by Human Gate<br>Agent cannot execute this operation<br>Incident recorded in audit log</div>
+    `;
+  }
+
+  // Reset after 3s
+  setTimeout(resetPhone, 3500);
+}
+
+function processDecision(decision, responseTime) {
+  if (!currentTx) return;
+
+  if (decision === 'approved') {
+    stats.approved++;
+  } else {
+    stats.rejected++;
+    if (currentTx.risk >= 60) stats.saved += Math.round(currentTx.usdVal);
+  }
+
+  updateQueueStatus(decision);
+  addToLog({ ...currentTx, decision, responseTime });
+  updateStats();
+  document.getElementById('countdownLabel').textContent = decision === 'approved' ? '✅ TX zatwierdzona by human' : '❌ TX odrzucona by human';
+  document.getElementById('countdownBar').style.width = '0%';
+}
+
+function handleExpiry() {
+  if (!currentTx) return;
+  stats.expired++;
+  stats.saved += Math.round(currentTx.usdVal);
+  updateQueueStatus('expired');
+  addToLog({ ...currentTx, decision:'expired', responseTime:'60s' });
+  updateStats();
+
+  document.getElementById('phoneTimer').textContent = 'WYGASŁA';
+  document.getElementById('phoneTimer').className = 'qi-timer urgent';
+  document.getElementById('phoneActions').style.display = 'none';
+
+  const el = document.getElementById('decisionResult');
+  el.className = 'decision-result show';
+  el.innerHTML = `
+    <div class="decision-icon">⏱️</div>
+    <div class="decision-label rejected">EXPIRED — TIMEOUT</div>
+    <div class="decision-sub">No response within 60s<br>TX automatically blocked<br>Agent cannot retry without new gate</div>
+  `;
+
+  document.getElementById('countdownLabel').textContent = '⏱️ Timeout — TX automatically blocked';
+  document.getElementById('countdownBar').style.width = '0%';
+  setTimeout(resetPhone, 3000);
+}
+
+function resetPhone() {
+  currentTx = null;
+  document.getElementById('phoneActive').style.display = 'none';
+  document.getElementById('phoneIdle').style.display = 'block';
+  document.getElementById('bioArea').classList.remove('show');
+  document.getElementById('countdownLabel').textContent = '—';
+  document.getElementById('countdownBar').style.width = '0%';
+}
+
+function showAutoApprove(amount, token, usdVal) {
+  stats.approved++;
+  updateStats();
+  document.getElementById('countdownLabel').textContent = `✅ TX auto-zatwierdzona — $${Math.round(usdVal)} poniżej progu $10K`;
+  document.getElementById('countdownBar').style.width = '100%';
+  document.getElementById('countdownBar').style.background = 'var(--green)';
+  setTimeout(() => {
+    document.getElementById('countdownLabel').textContent = '—';
+    document.getElementById('countdownBar').style.width = '0%';
+    document.getElementById('countdownBar').style.background = 'var(--gold)';
+  }, 2500);
+}
+
+// --- QUEUE ---
+function addToQueue(tx) {
+  const id = Date.now();
+  queueItems.unshift({ id, tx, status:'pending', timeLeft: TIMEOUT_SEC });
+  renderQueue();
+}
+
+function updateQueueStatus(status) {
+  if (queueItems.length > 0) {
+    queueItems[0].status = status;
+    renderQueue();
+  }
+}
+
+function updateQueueTimers() {
+  const pending = queueItems.find(q => q.status === 'pending');
+  if (pending) { pending.timeLeft = timerSeconds; renderQueue(); }
+}
+
+function renderQueue() {
+  const el = document.getElementById('queueList');
+  document.getElementById('queueCount').textContent = queueItems.filter(q=>q.status==='pending').length + ' pending';
+
+  if (queueItems.length === 0) {
+    el.innerHTML = '<div class="empty-state">// No pending TX</div>';
+    return;
+  }
+
+  el.innerHTML = queueItems.slice(0,6).map(q => {
+    const usd = Math.round(q.tx.usdVal).toLocaleString();
+    const timerCls = q.status==='pending' ? (q.timeLeft<=10?'urgent':'ok') : 'done';
+    const timerText = q.status==='pending' ? q.timeLeft+'s' : q.status==='approved'?'✓ OK':q.status==='rejected'?'✗ REJ':'⏱ EXP';
+    return `
+      <div class="queue-item ${q.status}">
+        <div class="qi-header">
+          <div class="qi-amount">${q.tx.amount} ${q.tx.token} <span style="font-size:11px;font-weight:400;color:var(--t2)">≈$${usd}</span></div>
+          <span class="qi-status ${q.status}">${q.status.toUpperCase()}</span>
+        </div>
+        <div class="qi-details">
+          <span>risk: <strong style="color:${q.tx.risk>=66?'var(--red)':q.tx.risk>=31?'var(--amber)':'var(--green)'}">${q.tx.risk}/100</strong></span>
+          <span>${q.tx.to.substring(0,16)}...</span>
+          <span class="qi-timer ${timerCls}">${timerText}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- LOG ---
+function addToLog(data) {
+  const tbody = document.getElementById('logBody');
+  const empty = tbody.querySelector('.empty-state');
+  if (empty) tbody.innerHTML = '';
+
+  const time = new Date().toLocaleTimeString('pl-PL');
+  const decCls = data.decision==='approved'||data.decision==='auto-approved' ? 'approved' : data.decision==='expired' ? 'expired' : 'rejected';
+  const decLabel = data.decision==='approved' ? '✅ APPROVED' : data.decision==='auto-approved' ? '⚡ AUTO-OK' : data.decision==='expired' ? '⏱ EXPIRED' : '❌ REJECTED';
+  const riskColor = data.risk>=66?'var(--red)':data.risk>=31?'var(--amber)':'var(--green)';
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="muted">${time}</td>
+    <td style="font-weight:700">${data.amount} ${data.token}</td>
+    <td class="muted">${data.token}</td>
+    <td style="color:var(--blue);font-family:'Geist Mono',monospace;">${data.to.substring(0,16)}...</td>
+    <td style="color:${riskColor};font-weight:700">${data.risk}/100</td>
+    <td><span class="badge ${decCls}">${decLabel}</span></td>
+    <td class="muted">${data.responseTime}</td>
+  `;
+  tbody.insertBefore(tr, tbody.firstChild);
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = stats.total;
+  document.getElementById('s-approved').textContent = stats.approved;
+  document.getElementById('s-rejected').textContent = stats.rejected;
+  document.getElementById('s-expired').textContent = stats.expired;
+  document.getElementById('s-saved').textContent = '$' + stats.saved.toLocaleString();
+}
+
+function clearLog() {
+  document.getElementById('logBody').innerHTML = '<tr><td colspan="7" class="empty-state">// no history — send TX to gate</td></tr>';
+  queueItems = [];
+  renderQueue();
+  stats = { total:0, approved:0, rejected:0, expired:0, saved:0 };
+  updateStats();
+}
+</script>
+</body>
+</html>
