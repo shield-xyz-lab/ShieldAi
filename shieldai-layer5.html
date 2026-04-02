@@ -24,8 +24,6 @@
     --text: #c8d6e8;
     --t2: #5a7394;
     --t3: #2a3d52;
-    --glime: rgba(132,204,22,0.1);
-    --gsky: rgba(56,189,248,0.1);
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -46,7 +44,6 @@
 
   .wrap { max-width:1300px; margin:0 auto; padding:22px 26px; position:relative; z-index:1; }
 
-  /* NAV */
   nav {
     display:flex; align-items:center; justify-content:space-between;
     padding-bottom:20px; border-bottom:1px solid var(--b1); margin-bottom:24px;
@@ -93,7 +90,6 @@
   .chip.live .cdot { background:var(--sky); }
   @keyframes bp { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-  /* STATS */
   .stats { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:22px; }
 
   .stat {
@@ -112,10 +108,7 @@
   .vv { color:var(--violet); }
   .stat-h { font-family:'Azeret Mono',monospace; font-size:10px; color:var(--t3); margin-top:3px; }
 
-  /* LAYOUT */
-  .layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
   .layout3 { display:grid; grid-template-columns:1.6fr 1fr; gap:16px; margin-bottom:16px; }
-  .fw { grid-column:1/-1; }
 
   .card { background:var(--s1); border:1px solid var(--b1); border-radius:12px; overflow:hidden; }
   .card-head {
@@ -125,7 +118,6 @@
   .card-title { font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--t2); display:flex; align-items:center; gap:8px; }
   .card-body { padding:18px; }
 
-  /* LIVE FEED */
   .live-feed { max-height:280px; overflow-y:auto; }
 
   .event-row {
@@ -145,11 +137,9 @@
   .event-row.normal { border-left:2px solid transparent; }
 
   .ev-time { color:var(--t2); }
-  .ev-type { }
   .ev-type.normal { color:var(--sky); }
   .ev-type.anomaly { color:var(--rose); font-weight:600; }
   .ev-type.warning { color:var(--amber); }
-  .ev-desc { color:var(--t2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ev-score { font-weight:700; text-align:right; }
   .ev-status { text-align:right; }
 
@@ -159,7 +149,6 @@
   .badge.alert { background:rgba(251,113,133,0.12); color:var(--rose); border:1px solid rgba(251,113,133,0.25); }
   .badge.frozen { background:rgba(124,58,237,0.12); color:var(--violet); border:1px solid rgba(124,58,237,0.25); }
 
-  /* BEHAVIOR PROFILE */
   .profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
   .profile-item {
@@ -174,12 +163,8 @@
   .profile-current.normal span { color:var(--emerald); }
   .profile-current.warn span { color:var(--amber); }
   .profile-current.anomaly span { color:var(--rose); }
-
   .profile-bar-wrap { margin-top:7px; height:4px; background:var(--b1); border-radius:2px; overflow:hidden; }
   .profile-bar { height:100%; border-radius:2px; transition:width 0.5s ease; }
-
-  /* ANOMALY SCORE METER */
-  .score-meter { position:relative; }
 
   .score-ring {
     width:120px; height:120px; margin:0 auto 12px;
@@ -194,7 +179,6 @@
   .score-big { font-size:28px; font-weight:800; }
   .score-label { font-family:'Azeret Mono',monospace; font-size:10px; color:var(--t2); }
 
-  /* SIMULATION CONTROLS */
   .sim-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
   .sim-btn {
@@ -209,7 +193,6 @@
   .stag.amber { background:rgba(251,191,36,0.12); color:var(--amber); }
   .stag.green { background:rgba(16,185,129,0.1); color:var(--emerald); }
 
-  /* ALERT BOX */
   .alert-box {
     border-radius:10px; padding:14px 16px; margin-bottom:12px;
     display:flex; gap:12px; align-items:flex-start;
@@ -228,7 +211,6 @@
   .alert-title.info { color:var(--sky); }
   .alert-desc { font-size:12px; color:var(--t2); line-height:1.6; font-family:'Azeret Mono',monospace; }
 
-  /* AGENT STATUS */
   .agent-status {
     display:flex; align-items:center; gap:10px; padding:12px 14px;
     border-radius:8px; font-size:13px; font-weight:600; margin-bottom:14px;
@@ -245,7 +227,6 @@
   .frozen .status-dot-big { background:var(--violet); }
   .alert .status-dot-big { background:var(--rose); animation:bp 0.5s ease-in-out infinite; }
 
-  /* ACTION BUTTONS */
   .action-row { display:flex; gap:8px; }
   .act-btn {
     flex:1; padding:9px 10px; border-radius:7px; font-family:'Plus Jakarta Sans',sans-serif;
@@ -258,7 +239,6 @@
   .act-btn.reset { background:rgba(56,189,248,0.08); border-color:rgba(56,189,248,0.2); color:var(--sky); }
   .act-btn.reset:hover { background:rgba(56,189,248,0.15); }
 
-  /* CHART AREA */
   .chart-wrap { position:relative; height:120px; }
   canvas { width:100% !important; }
 
@@ -266,7 +246,6 @@
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:var(--b3); border-radius:2px; }
 
-  .divider { height:1px; background:var(--b1); margin:14px 0; }
   .mono { font-family:'Azeret Mono',monospace; }
   .muted { color:var(--t2); }
 </style>
@@ -274,7 +253,6 @@
 <body>
 <div class="wrap">
 
-  <!-- NAV -->
   <nav>
     <div class="brand">
       <div class="logo-wrap">
@@ -292,11 +270,10 @@
     </div>
   </nav>
 
-  <!-- STATS -->
   <div class="stats">
     <div class="stat">
       <div class="stat-bar" style="background:linear-gradient(90deg,var(--lime),transparent)"></div>
-      <div class="stat-l">Monitored actions</div>
+      <div class="stat-l">Monitored Actions</div>
       <div class="stat-v lv" id="s-actions">0</div>
       <div class="stat-h">since watchdog start</div>
     </div>
@@ -326,7 +303,7 @@
     </div>
     <div class="stat">
       <div class="stat-bar" style="background:linear-gradient(90deg,var(--emerald),transparent)"></div>
-      <div class="stat-l">Agent status</div>
+      <div class="stat-l">Agent Status</div>
       <div class="stat-v ev" id="s-status" style="font-size:14px;padding-top:4px;">RUNNING</div>
       <div class="stat-h">watchdog verdict</div>
     </div>
@@ -334,9 +311,7 @@
 
   <div class="layout3">
 
-    <!-- LEFT: LIVE FEED + CHART -->
     <div>
-      <!-- AGENT STATUS BAR -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-body" style="padding:14px 18px;">
           <div class="agent-status running" id="agentStatus">
@@ -344,23 +319,22 @@
             <span id="agentStatusText">Agent RUNNING — behavior within baseline — watchdog monitoring</span>
           </div>
           <div class="action-row">
-            <button class="act-btn freeze" onclick="forceFreeze()">🧊 Freeze agent</button>
-            <button class="act-btn resume" onclick="resumeAgent()">▶️ Resume agent</button>
-            <button class="act-btn reset" onclick="resetBaseline()">🔄 Reset baseline</button>
+            <button class="act-btn freeze" onclick="forceFreeze()">🧊 Freeze Agent</button>
+            <button class="act-btn resume" onclick="resumeAgent()">▶️ Resume Agent</button>
+            <button class="act-btn reset" onclick="resetBaseline()">🔄 Reset Baseline</button>
           </div>
         </div>
       </div>
 
-      <!-- LIVE EVENT FEED -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-head">
           <div class="card-title">📡 Live Event Stream <span id="liveIndicator" style="width:6px;height:6px;background:var(--lime);border-radius:50%;display:inline-block;animation:bp 1s infinite;margin-left:4px;"></span></div>
-          <span class="mono" style="font-size:11px;color:var(--t3)" id="eventCount">0 eventów</span>
+          <span class="mono" style="font-size:11px;color:var(--t3)" id="eventCount">0 events</span>
         </div>
         <div class="event-row header">
           <span>Time</span>
-          <span>Typ</span>
-          <span>Opis akcji</span>
+          <span>Type</span>
+          <span>Action Description</span>
           <span style="text-align:right">Score</span>
           <span style="text-align:right">Status</span>
         </div>
@@ -371,10 +345,9 @@
         </div>
       </div>
 
-      <!-- ANOMALY SCORE CHART -->
       <div class="card">
         <div class="card-head">
-          <div class="card-title">📈 Anomaly Score — history</div>
+          <div class="card-title">📈 Anomaly Score — History</div>
           <span class="mono" style="font-size:11px;color:var(--t3)">last 20 events</span>
         </div>
         <div class="card-body">
@@ -385,10 +358,8 @@
       </div>
     </div>
 
-    <!-- RIGHT: CONTROLS -->
     <div>
 
-      <!-- ANOMALY METER -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-head">
           <div class="card-title">🎯 Anomaly Score Meter</div>
@@ -414,7 +385,6 @@
         </div>
       </div>
 
-      <!-- BEHAVIOR PROFILE -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-head">
           <div class="card-title">📊 Behavioral Baseline</div>
@@ -425,10 +395,9 @@
         </div>
       </div>
 
-      <!-- SIMULATION BUTTONS -->
       <div class="card">
         <div class="card-head">
-          <div class="card-title">⚡ Behavior simulator</div>
+          <div class="card-title">⚡ Behavior Simulator</div>
         </div>
         <div class="card-body">
           <div class="sim-grid">
@@ -439,22 +408,22 @@
               <div class="stag green">🟢 Normal</div><br>Reading prices and yield rates
             </button>
             <button class="sim-btn" onclick="simulate('freq_spike')">
-              <div class="stag amber">🟡 Anomalia</div><br>Sudden TX frequency spike
+              <div class="stag amber">🟡 Anomaly</div><br>Sudden TX frequency spike
             </button>
             <button class="sim-btn" onclick="simulate('new_contract')">
-              <div class="stag amber">🟡 Anomalia</div><br>Interaction with new contract
+              <div class="stag amber">🟡 Anomaly</div><br>Interaction with new contract
             </button>
             <button class="sim-btn" onclick="simulate('amount_spike')">
-              <div class="stag red">🔴 Krytyczne</div><br>10x amount limit breach
+              <div class="stag red">🔴 Critical</div><br>10x amount limit breach
             </button>
             <button class="sim-btn" onclick="simulate('burst_attack')">
-              <div class="stag red">🔴 Krytyczne</div><br>Seria suspicious TX (atak)
+              <div class="stag red">🔴 Critical</div><br>Burst of suspicious TX (attack)
             </button>
             <button class="sim-btn" onclick="simulate('off_hours')">
-              <div class="stag amber">🟡 Anomalia</div><br>Activity outside normal window
+              <div class="stag amber">🟡 Anomaly</div><br>Activity outside normal window
             </button>
             <button class="sim-btn" onclick="simulate('drain_pattern')">
-              <div class="stag red">🔴 Krytyczne</div><br>Wallet draining pattern
+              <div class="stag red">🔴 Critical</div><br>Wallet draining pattern
             </button>
           </div>
         </div>
@@ -466,22 +435,15 @@
 </div>
 
 <script>
-// ==============================================
-// SHIELDAI — AGENT WATCHDOG ENGINE v1.0
-// Warstwa 5: Behavioral Anomaly Detection
-// ==============================================
-
-// --- BEHAVIORAL BASELINE (learned normal) ---
 const BASELINE = {
-  tx_per_minute:     { normal: 2,      warn: 8,     alert: 15,    label: 'TX / minutę',      unit: 'tx/min' },
-  avg_tx_amount_eth: { normal: 1.2,    warn: 5.0,   alert: 10.0,  label: 'Avg TX amount',     unit: 'ETH' },
-  unique_contracts:  { normal: 3,      warn: 8,     alert: 15,    label: 'New contracts',    unit: 'szt' },
-  external_calls:    { normal: 1,      warn: 5,     alert: 10,    label: 'Ext. calls',    unit: '/min' },
-  gas_multiplier:    { normal: 1.0,    warn: 3.0,   alert: 6.0,   label: 'Gas multiplier',       unit: 'x norm' },
-  idle_breaks:       { normal: 5,      warn: 1,     alert: 0,     label: 'Idle breaks',      unit: '/h' },
+  tx_per_minute:     { normal: 2,   warn: 8,   alert: 15,  label: 'TX / minute',        unit: 'tx/min' },
+  avg_tx_amount_eth: { normal: 1.2, warn: 5.0, alert: 10.0,label: 'Avg TX amount',       unit: 'ETH' },
+  unique_contracts:  { normal: 3,   warn: 8,   alert: 15,  label: 'New contracts',       unit: 'pcs' },
+  external_calls:    { normal: 1,   warn: 5,   alert: 10,  label: 'External calls',      unit: '/min' },
+  gas_multiplier:    { normal: 1.0, warn: 3.0, alert: 6.0, label: 'Gas multiplier',      unit: 'x norm' },
+  idle_breaks:       { normal: 5,   warn: 1,   alert: 0,   label: 'Idle breaks',         unit: '/h' },
 };
 
-// --- STATE ---
 let anomalyScore = 0;
 let agentFrozen = false;
 let stats = { actions: 0, anomalies: 0, warnings: 0, freezes: 0 };
@@ -489,7 +451,6 @@ let scoreHistory = [];
 let currentMetrics = { tx_per_minute: 2, avg_tx_amount_eth: 1.2, unique_contracts: 3, external_calls: 1, gas_multiplier: 1.0, idle_breaks: 5 };
 let eventCount = 0;
 
-// --- SIMULATE SCENARIOS ---
 const SCENARIOS = {
   normal_swap: {
     type: 'normal',
@@ -524,7 +485,7 @@ const SCENARIOS = {
     type: 'anomaly',
     events: [
       { desc: 'TRANSFER 12.5 ETH — 10x normal avg (1.2 ETH)', score_delta: 30, metric_changes: { avg_tx_amount_eth: 12.5 } },
-      { desc: 'TRANSFER 8.3 ETH — second large tx in window', score_delta: 25, metric_changes: { avg_tx_amount_eth: 10.4 } },
+      { desc: 'TRANSFER 8.3 ETH — second large TX in window', score_delta: 25, metric_changes: { avg_tx_amount_eth: 10.4 } },
     ]
   },
   burst_attack: {
@@ -552,118 +513,90 @@ const SCENARIOS = {
   }
 };
 
-// --- SIMULATE ---
 async function simulate(key) {
   if (agentFrozen && key !== 'normal_swap' && key !== 'normal_read') {
-    addEvent('⛔', 'FROZEN', 'Agent zamrożony — akcja zablokowana przez watchdog', 0, 'frozen');
+    addEvent('⛔', 'FROZEN', 'Agent frozen — action blocked by watchdog', 0, 'frozen');
     return;
   }
 
-  const scenario = SCENARIOS[key];
-  if (!scenario) return;
+  const scenario = SCENARIOS[key]; if (!scenario) return;
 
   for (let i = 0; i < scenario.events.length; i++) {
     const ev = scenario.events[i];
     await sleep(i * 350);
-
-    // Update metrics
     Object.assign(currentMetrics, ev.metric_changes);
-
-    // Update anomaly score
     anomalyScore = Math.max(0, Math.min(100, anomalyScore + ev.score_delta));
     scoreHistory.push(anomalyScore);
     if (scoreHistory.length > 20) scoreHistory.shift();
-
     stats.actions++;
     const evType = scenario.type;
-
     if (ev.score_delta > 0) {
       if (anomalyScore >= 66) stats.anomalies++;
       else if (anomalyScore >= 31) stats.warnings++;
     }
-
     addEvent(
       evType === 'normal' ? '→' : evType === 'warning' ? '⚠' : '🚨',
       evType === 'normal' ? 'NORMAL' : evType === 'warning' ? 'WARNING' : 'ANOMALY',
-      ev.desc,
-      anomalyScore,
+      ev.desc, anomalyScore,
       evType === 'normal' ? 'normal' : evType === 'warning' ? 'warning' : 'anomaly'
     );
-
     updateScoreMeter();
     updateProfileGrid();
     updateStatsBar();
     drawChart();
-
-    // Auto-freeze on critical
-    if (anomalyScore >= 85 && !agentFrozen) {
-      await sleep(200);
-      autoFreeze();
-    }
+    if (anomalyScore >= 85 && !agentFrozen) { await sleep(200); autoFreeze(); }
   }
 }
 
-// --- ADD EVENT TO FEED ---
 function addEvent(icon, type, desc, score, cssClass) {
   const feed = document.getElementById('liveFeed');
   const empty = feed.querySelector('div[style]');
   if (empty) feed.innerHTML = '';
-
   eventCount++;
-  document.getElementById('eventCount').textContent = eventCount + ' eventów';
-
-  const time = new Date().toLocaleTimeString('pl-PL');
+  document.getElementById('eventCount').textContent = eventCount + ' events';
+  const time = new Date().toLocaleTimeString('en-US', {hour12:false});
   const scoreColor = score >= 66 ? 'var(--rose)' : score >= 31 ? 'var(--amber)' : 'var(--emerald)';
   const badgeCls = score >= 66 ? 'alert' : score >= 31 ? 'warn' : 'ok';
   const badgeLabel = score >= 66 ? '⚠ ALERT' : score >= 31 ? '~ WARN' : '✓ OK';
-
   const row = document.createElement('div');
   row.className = `event-row ${cssClass}`;
   row.innerHTML = `
     <span class="ev-time">${time}</span>
     <span class="ev-type ${cssClass}">${type}</span>
-    <span class="ev-desc">${icon} ${desc}</span>
+    <span style="color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${icon} ${desc}</span>
     <span class="ev-score" style="color:${scoreColor}">${score}</span>
-    <span class="ev-status"><span class="badge ${badgeCls}">${badgeLabel}</span></span>
-  `;
-
+    <span class="ev-status"><span class="badge ${badgeCls}">${badgeLabel}</span></span>`;
   feed.insertBefore(row, feed.firstChild);
 }
 
-// --- UPDATE SCORE METER ---
 function updateScoreMeter() {
   const score = anomalyScore;
   document.getElementById('scoreBig').textContent = score;
   document.getElementById('s-score').textContent = score;
-
   const circumference = 326.7;
   const offset = circumference - (score / 100) * circumference;
   const fill = document.getElementById('scoreRingFill');
   fill.style.strokeDashoffset = offset;
-
   const color = score >= 66 ? 'var(--rose)' : score >= 31 ? 'var(--amber)' : 'var(--lime)';
   fill.style.stroke = color;
   document.getElementById('scoreBig').style.color = color;
 
-  // Active alerts
   const alerts = document.getElementById('activeAlerts');
   alerts.innerHTML = '';
 
   if (score >= 85) {
-    alerts.innerHTML += `<div class="alert-box critical"><div class="alert-icon">🚨</div><div><div class="alert-title critical">AGENT ZAMROŻONY</div><div class="alert-desc">Anomaly score krytyczny. Wszystkie transakcje wstrzymane.</div></div></div>`;
+    alerts.innerHTML += `<div class="alert-box critical"><div class="alert-icon">🚨</div><div><div class="alert-title critical">AGENT FROZEN</div><div class="alert-desc">Critical anomaly score. All transactions suspended.</div></div></div>`;
   } else if (score >= 66) {
-    alerts.innerHTML += `<div class="alert-box warn"><div class="alert-icon">⚠️</div><div><div class="alert-title warn">Wysokie ryzyko anomalii</div><div class="alert-desc">Zachowanie agenta odbiega od baseline. Monitorowanie wzmożone.</div></div></div>`;
+    alerts.innerHTML += `<div class="alert-box warn"><div class="alert-icon">⚠️</div><div><div class="alert-title warn">High anomaly risk</div><div class="alert-desc">Agent behavior deviates from baseline. Monitoring heightened.</div></div></div>`;
   } else if (score >= 31) {
-    alerts.innerHTML += `<div class="alert-box info"><div class="alert-icon">ℹ️</div><div><div class="alert-title info">Wzorzec poza normą</div><div class="alert-desc">Kilka wskaźników powyżej baseline — obserwuj dalej.</div></div></div>`;
+    alerts.innerHTML += `<div class="alert-box info"><div class="alert-icon">ℹ️</div><div><div class="alert-title info">Pattern outside norm</div><div class="alert-desc">Several indicators above baseline — continue monitoring.</div></div></div>`;
   } else {
-    alerts.innerHTML = `<div style="text-align:center;color:var(--t3);font-family:'Azeret Mono',monospace;font-size:11px;padding:8px;">✓ Zachowanie w normie</div>`;
+    alerts.innerHTML = `<div style="text-align:center;color:var(--t3);font-family:'Azeret Mono',monospace;font-size:11px;padding:8px;">✓ Behavior within normal range</div>`;
   }
 
-  // Update agent status
   updateAgentStatus();
 }
 
-// --- UPDATE AGENT STATUS ---
 function updateAgentStatus() {
   const el = document.getElementById('agentStatus');
   const txt = document.getElementById('agentStatusText');
@@ -692,24 +625,17 @@ function updateAgentStatus() {
   }
 }
 
-// --- PROFILE GRID ---
 function updateProfileGrid() {
   const el = document.getElementById('profileGrid');
   el.innerHTML = Object.entries(BASELINE).map(([key, b]) => {
     const current = currentMetrics[key] ?? b.normal;
-    const isWarn = key === 'idle_breaks'
-      ? current <= b.warn
-      : current >= b.warn;
-    const isAlert = key === 'idle_breaks'
-      ? current <= b.alert
-      : current >= b.alert;
-
+    const isWarn = key === 'idle_breaks' ? current <= b.warn : current >= b.warn;
+    const isAlert = key === 'idle_breaks' ? current <= b.alert : current >= b.alert;
     const cssClass = isAlert ? 'anomaly' : isWarn ? 'warn' : 'normal';
     const barPct = key === 'idle_breaks'
       ? Math.round((1 - current / b.normal) * 100)
       : Math.min(100, Math.round((current / b.alert) * 100));
     const barColor = isAlert ? 'var(--rose)' : isWarn ? 'var(--amber)' : 'var(--lime)';
-
     return `
       <div class="profile-item">
         <div class="profile-label">${b.label}</div>
@@ -718,59 +644,41 @@ function updateProfileGrid() {
         <div class="profile-bar-wrap">
           <div class="profile-bar" style="width:${barPct}%;background:${barColor}"></div>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
-// --- CHART ---
 function drawChart() {
   const canvas = document.getElementById('scoreChart');
   const ctx = canvas.getContext('2d');
   const W = canvas.parentElement.offsetWidth;
   const H = 120;
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W; canvas.height = H;
   ctx.clearRect(0, 0, W, H);
-
   if (scoreHistory.length < 2) return;
-
   const data = scoreHistory;
   const step = W / (data.length - 1);
   const pad = 10;
-
-  // Grid lines
   [30, 65].forEach(lvl => {
     const y = H - pad - ((lvl / 100) * (H - pad * 2));
     ctx.beginPath();
     ctx.strokeStyle = lvl === 30 ? 'rgba(251,191,36,0.15)' : 'rgba(251,113,133,0.15)';
-    ctx.setLineDash([4, 4]);
-    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
     ctx.moveTo(0, y); ctx.lineTo(W, y);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]);
   });
-
-  // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, H);
   const lastScore = data[data.length - 1];
   const topColor = lastScore >= 66 ? 'rgba(251,113,133,0.3)' : lastScore >= 31 ? 'rgba(251,191,36,0.25)' : 'rgba(132,204,22,0.25)';
-  grad.addColorStop(0, topColor);
-  grad.addColorStop(1, 'transparent');
-
+  grad.addColorStop(0, topColor); grad.addColorStop(1, 'transparent');
   ctx.beginPath();
   data.forEach((d, i) => {
     const x = i * step;
     const y = H - pad - ((d / 100) * (H - pad * 2));
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
-  ctx.lineTo((data.length - 1) * step, H);
-  ctx.lineTo(0, H);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Line
+  ctx.lineTo((data.length - 1) * step, H); ctx.lineTo(0, H);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
   const lineColor = lastScore >= 66 ? '#fb7185' : lastScore >= 31 ? '#fbbf24' : '#84cc16';
   ctx.beginPath();
   data.forEach((d, i) => {
@@ -778,35 +686,24 @@ function drawChart() {
     const y = H - pad - ((d / 100) * (H - pad * 2));
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
-  ctx.strokeStyle = lineColor;
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Last point dot
+  ctx.strokeStyle = lineColor; ctx.lineWidth = 2; ctx.stroke();
   const lx = (data.length - 1) * step;
   const ly = H - pad - ((lastScore / 100) * (H - pad * 2));
-  ctx.beginPath();
-  ctx.arc(lx, ly, 4, 0, Math.PI * 2);
-  ctx.fillStyle = lineColor;
-  ctx.fill();
-  ctx.strokeStyle = 'var(--bg)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+  ctx.fillStyle = lineColor; ctx.fill();
+  ctx.strokeStyle = 'var(--bg)'; ctx.lineWidth = 2; ctx.stroke();
 }
 
-// --- ACTIONS ---
 function autoFreeze() {
-  agentFrozen = true;
-  stats.freezes++;
+  agentFrozen = true; stats.freezes++;
   updateStatsBar();
-  addEvent('🧊', 'FROZEN', 'AUTO-FREEZE: Anomaly score exceeded 85 — agent stopped automatycznie', anomalyScore, 'anomaly');
+  addEvent('🧊', 'FROZEN', 'AUTO-FREEZE: Anomaly score exceeded 85 — agent stopped automatically', anomalyScore, 'anomaly');
   updateAgentStatus();
 }
 
 function forceFreeze() {
   if (agentFrozen) return;
-  agentFrozen = true;
-  stats.freezes++;
+  agentFrozen = true; stats.freezes++;
   updateStatsBar();
   addEvent('🧊', 'FROZEN', 'MANUAL FREEZE: Operator manually froze agent', anomalyScore, 'anomaly');
   updateAgentStatus();
@@ -817,23 +714,16 @@ function resumeAgent() {
   anomalyScore = Math.max(0, anomalyScore - 30);
   scoreHistory.push(anomalyScore);
   addEvent('▶', 'RESUME', 'Agent resumed by operator — anomaly score reduced', anomalyScore, 'normal');
-  updateScoreMeter();
-  updateStatsBar();
-  drawChart();
+  updateScoreMeter(); updateStatsBar(); drawChart();
 }
 
 function resetBaseline() {
-  anomalyScore = 0;
-  agentFrozen = false;
-  scoreHistory = [];
+  anomalyScore = 0; agentFrozen = false; scoreHistory = [];
   Object.assign(currentMetrics, { tx_per_minute: 2, avg_tx_amount_eth: 1.2, unique_contracts: 3, external_calls: 1, gas_multiplier: 1.0, idle_breaks: 5 });
-  updateScoreMeter();
-  updateProfileGrid();
-  drawChart();
+  updateScoreMeter(); updateProfileGrid(); drawChart();
   addEvent('🔄', 'RESET', 'Baseline reset — measurements from scratch', 0, 'normal');
 }
 
-// --- STATS ---
 function updateStatsBar() {
   document.getElementById('s-actions').textContent = stats.actions;
   document.getElementById('s-anomalies').textContent = stats.anomalies;
@@ -843,7 +733,6 @@ function updateStatsBar() {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// INIT
 updateProfileGrid();
 updateScoreMeter();
 drawChart();
