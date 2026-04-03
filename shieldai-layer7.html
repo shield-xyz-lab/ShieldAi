@@ -19,7 +19,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
 .chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;}
 .chip.r{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--r2);}
 .chip.new{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(245,158,11,.15));border:1px solid rgba(248,113,113,.4);color:#ffe8e8;font-weight:700;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:dp 1.5s ease-in-out infinite;}
+.chip.api-live{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green);}
+.chip.api-off{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red);}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:dp 1.5s ease-in-out infinite;}
 @keyframes dp{0%,100%{opacity:1;}50%{opacity:.2;}}
 .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px;}
 .stat{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
@@ -102,9 +104,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
       <div class="brand-sub">// State-Sponsored Attack Defense · Rate Limiter · Domain Whitelist · Weapon Code Detection</div>
     </div>
   </div>
-  <div style="display:flex;gap:8px;">
+  <div style="display:flex;gap:8px;align-items:center;">
     <div class="chip new">★ NEW — 2026 Architecture</div>
     <div class="chip r"><div class="dot"></div>Outbound Monitor ACTIVE</div>
+    <div class="chip api-off" id="apiBadge"><div class="dot"></div><span id="apiStatus">Connecting...</span></div>
   </div>
 </nav>
 
@@ -117,7 +120,6 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
   <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--gold),transparent)"></div><div class="stat-lbl">Weapon Code</div><div class="stat-val" style="color:var(--gold)" id="s6">0</div><div class="stat-sub">exploit patterns</div></div>
 </div>
 
-<!-- THREAT MAP -->
 <div class="threat-grid">
   <div class="tc c"><div class="tc-icon">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div><div class="tc-name c">State-Sponsored AI Attack</div><div class="tc-desc">GTG-1002 pattern: 1024 req/sec against 30 targets simultaneously. AI executes 80-90% of attack autonomously. Traditional security never detected it — victim companies noticed nothing.</div><div class="tc-badge c">🔴 REAL ATTACK — September 2025</div></div>
   <div class="tc h"><div class="tc-icon">🌐</div><div class="tc-name h">Lateral Movement</div><div class="tc-desc">Compromised agent attacks adjacent systems. Breaks declared scope to interact with unrelated APIs, databases, infrastructure. Detected by domain whitelist + scope analysis.</div><div class="tc-badge h">🟡 HIGH RISK</div></div>
@@ -127,11 +129,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
 <div class="grid2">
   <div class="card">
     <div class="card-hd"><div class="card-title">📊 Real-Time Rate Monitor (threshold: 500/min)</div></div>
-    <div class="card-body" id="rateBars">
+    <div class="card-body">
       <div class="rate-row"><div class="rate-lbl">DeFi Agent 01</div><div class="rate-track"><div class="rate-fill s" style="width:2.4%"><span>12/min</span></div></div></div>
       <div class="rate-row"><div class="rate-lbl">Portfolio Bot</div><div class="rate-track"><div class="rate-fill s" style="width:9%"><span>45/min</span></div></div></div>
       <div class="rate-row"><div class="rate-lbl">Arbitrage Bot</div><div class="rate-track"><div class="rate-fill w" style="width:36%"><span>180/min</span></div></div></div>
-      <div class="rate-row" id="unknownRate"><div class="rate-lbl">Unknown Agent</div><div class="rate-track"><div class="rate-fill s" id="unknownFill" style="width:0%"><span id="unknownVal">0/min</span></div></div></div>
+      <div class="rate-row"><div class="rate-lbl">Unknown Agent</div><div class="rate-track"><div class="rate-fill s" id="unknownFill" style="width:0%"><span id="unknownVal">0/min</span></div></div></div>
       <div style="margin-top:10px;display:flex;gap:12px;">
         <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);"><div style="width:8px;height:8px;border-radius:2px;background:var(--green);"></div>Safe &lt;200</div>
         <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);"><div style="width:8px;height:8px;border-radius:2px;background:var(--amber);"></div>Warn 200-500</div>
@@ -202,8 +204,25 @@ nav{display:flex;align-items:center;justify-content:space-between;padding-bottom
   </div>
 </div>
 </div>
+
 <script>
-let st={b:0,f:0,c:0,r:0,d:0,w:0},total=0;
+const API_BASE = 'https://shieldai-production.up.railway.app';
+
+async function checkApiHealth() {
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const badge = document.getElementById('apiBadge');
+      badge.className = 'chip api-live';
+      badge.innerHTML = '<div class="dot"></div><span>API LIVE — Railway</span>';
+    } else throw new Error();
+  } catch {
+    document.getElementById('apiStatus').textContent = 'API offline — local mode';
+  }
+}
+checkApiHealth();
+
+let st={b:0,f:0,c:0,r:0,d:0,w:0};
 const SCEN={
   gtg:{agent:'Unknown Agent',dest:'30 external targets',rate:1024,cls:'bl',badge:'block',btxt:'🔥 FREEZE',color:'var(--red)',msg:'AGENT FROZEN — State-Sponsored Attack Pattern (GTG-1002)',isFreeze:true},
   exfil:{agent:'Portfolio Bot',dest:'storage-bucket.xyz',rate:180,cls:'bl',badge:'block',btxt:'⛔ BLOCK',color:'var(--red)',msg:'BLOCKED — Micro-Exfiltration (200 chunks < 8s)'},
@@ -211,15 +230,14 @@ const SCEN={
   c2:{agent:'DeFi Agent 01',dest:'unknown-c2.xyz',rate:50,cls:'wn',badge:'freeze',btxt:'⚠ WARN',color:'var(--amber)',msg:'WARNING — C2 Domain + New Contact Pattern'},
   normal:{agent:'Portfolio Bot',dest:'api.uniswap.org',rate:12,cls:'ok',badge:'allow',btxt:'✓ ALLOW',color:'var(--green)',msg:'ALLOWED — Approved domain, rate safe, clean output'},
 };
+
 function sim(k){
   const s=SCEN[k];if(!s)return;
-  total++;
-  if(s.isFreeze){st.f++;st.b++; document.getElementById('unknownFill').className='rate-fill d'; document.getElementById('unknownFill').style.width='100%'; document.getElementById('unknownVal').textContent='1024/min';}
+  if(s.isFreeze){st.f++;st.b++;document.getElementById('unknownFill').className='rate-fill d';document.getElementById('unknownFill').style.width='100%';document.getElementById('unknownVal').textContent='1024/min';}
   else if(s.cls==='bl')st.b++;
   else if(s.cls==='wn')st.d++;
   else st.c++;
-  addRow(s);
-  showAlert(s);
+  addRow(s);showAlert(s);
   document.getElementById('s1').textContent=st.b;
   document.getElementById('s2').textContent=st.f;
   document.getElementById('s3').textContent=st.c;
@@ -227,6 +245,7 @@ function sim(k){
   document.getElementById('s5').textContent=st.d;
   document.getElementById('s6').textContent=st.w;
 }
+
 function addRow(s){
   const feed=document.getElementById('feed');
   const emp=feed.querySelector('.es');if(emp)feed.innerHTML='';
@@ -236,10 +255,12 @@ function addRow(s){
   row.innerHTML=`<span class="muted">${new Date().toLocaleTimeString('en-US',{hour12:false})}</span><span style="color:var(--cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.agent}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2)">${s.dest}</span><span style="color:${rc};font-weight:700">${s.rate}</span><span><span class="badge ${s.badge}">${s.btxt}</span></span>`;
   feed.insertBefore(row,feed.firstChild);
 }
+
 function showAlert(s){
   const a=document.createElement('div');
-  a.style.cssText='position:fixed;top:20px;right:20px;z-index:9999;padding:12px 16px;border-radius:10px;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;max-width:320px;animation:si .3s ease;';
-  a.style.background=`rgba(${s.color==='var(--red)'?'239,68,68':s.color==='var(--amber)'?'245,158,11':'16,185,129'},.15)`;
+  a.style.cssText='position:fixed;top:20px;right:20px;z-index:9999;padding:12px 16px;border-radius:10px;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;max-width:320px;';
+  const rgb=s.color==='var(--red)'?'239,68,68':s.color==='var(--amber)'?'245,158,11':'16,185,129';
+  a.style.background=`rgba(${rgb},.15)`;
   a.style.border=`1px solid ${s.color}`;
   a.style.color=s.color;
   a.innerHTML=s.msg;
