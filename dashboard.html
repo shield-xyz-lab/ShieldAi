@@ -1,24 +1,481 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ShieldAI v3 — Live Dashboard</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #080B12; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShieldAI v3 — Live Dashboard</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080B12; font-family:'DM Mono','Fira Code',monospace; }
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#0D1117}
+::-webkit-scrollbar-thumb{background:#1E2D45;border-radius:2px}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:0.3}50%{transform:scale(2.5);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tab-btn{cursor:pointer;transition:all 0.2s;border:none}
+.tab-btn:hover{background:#1E2D45 !important}
+.agent-row{cursor:pointer;transition:background 0.15s}
+.agent-row:hover{background:#1E2D4522 !important}
+.freeze-btn{cursor:pointer;transition:all 0.2s;border:none}
+.freeze-btn:hover{opacity:0.8;transform:scale(0.97)}
+.clickable{cursor:pointer}
+.clickable:hover{opacity:0.8}
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" src="./dashboard.jsx"></script>
-  <script type="text/babel">
-    ReactDOM.createRoot(document.getElementById('root')).render(
-      React.createElement(ShieldAI)
-    );
-  </script>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const C = {
+  bg:"#080B12",surface:"#0D1117",card:"#111827",border:"#1E2D45",
+  blue:"#0B4FFF",electric:"#00D4FF",mint:"#00FFB3",amber:"#FFB800",
+  red:"#FF3D3D",green:"#10B981",white:"#F0F4FF",gray:"#4B5A6E",
+  muted:"#8892A4",text:"#C8D8EC",
+};
+
+const AGENTS = [
+  {id:"AGT-001",name:"TradingBot Alpha",chain:"Arbitrum",status:"safe",anomaly:0.03,txToday:47,spentToday:23.4,limit:100,lastTx:"12s ago",verified:true},
+  {id:"AGT-002",name:"DAO Payroll Agent",chain:"Mantle",status:"safe",anomaly:0.07,txToday:12,spentToday:1840,limit:5000,lastTx:"2m ago",verified:true},
+  {id:"AGT-003",name:"Yield Optimizer",chain:"Base",status:"warn",anomaly:0.61,txToday:203,spentToday:89.2,limit:50,lastTx:"3s ago",verified:false},
+  {id:"AGT-004",name:"NFT Scout Bot",chain:"Arbitrum",status:"safe",anomaly:0.11,txToday:8,spentToday:4.1,limit:20,lastTx:"8m ago",verified:true},
+  {id:"AGT-005",name:"Arb Executor",chain:"Mantle",status:"frozen",anomaly:0.94,txToday:891,spentToday:412,limit:50,lastTx:"now",verified:false},
+];
+
+const COMPLIANCE_ITEMS = [
+  {article:"Art. 9",title:"Risk Management System",status:"pass",detail:"Continuous monitoring active, anomaly baseline established"},
+  {article:"Art. 13",title:"Transparency & Logging",status:"pass",detail:"All agent actions logged immutably on-chain"},
+  {article:"Art. 14",title:"Human Oversight",status:"pass",detail:"Kill-switch active, owner alerts configured"},
+  {article:"Art. 15",title:"Accuracy & Robustness",status:"warn",detail:"Behavior baseline still training — 68h remaining"},
+  {article:"Art. 17",title:"Quality Management",status:"pass",detail:"SpendGuard policies deployed and audited"},
+  {article:"Art. 72",title:"Incident Reporting",status:"pass",detail:"AGT-005 freeze event logged and reported"},
+];
+
+const MCP_INIT = [
+  {time:"00:00:03",agent:"AGT-003",tool:"uniswap_swap",risk:"HIGH",action:"BLOCKED",reason:"Velocity: 203 calls/min (baseline: 12)"},
+  {time:"00:00:07",agent:"AGT-001",tool:"price_feed",risk:"LOW",action:"ALLOWED",reason:"Normal pattern"},
+  {time:"00:00:09",agent:"AGT-005",tool:"transfer_funds",risk:"CRIT",action:"FROZEN",reason:"Amount $412 exceeds limit $50 + anomaly 0.94"},
+  {time:"00:00:14",agent:"AGT-002",tool:"batch_pay",risk:"MED",action:"ALLOWED",reason:"Within policy, owner pre-approved"},
+  {time:"00:00:18",agent:"AGT-004",tool:"nft_bid",risk:"LOW",action:"ALLOWED",reason:"Normal pattern, whitelisted contract"},
+  {time:"00:00:22",agent:"AGT-003",tool:"approve_token",risk:"HIGH",action:"BLOCKED",reason:"Non-whitelisted contract 0x4f3a..."},
+];
+
+function PulseDot({color=C.green,size=8}){
+  return <span style={{position:"relative",display:"inline-block",width:size,height:size}}>
+    <span style={{position:"absolute",inset:0,borderRadius:"50%",background:color,opacity:0.3,animation:"pulse 2s infinite"}}/>
+    <span style={{position:"absolute",inset:2,borderRadius:"50%",background:color}}/>
+  </span>;
+}
+
+function StatusBadge({status}){
+  const m={safe:{label:"SAFE",bg:"#0A2818",color:C.green,border:"#0D4A2A"},warn:{label:"WARN",bg:"#2A1A00",color:C.amber,border:"#4A3000"},frozen:{label:"FROZEN",bg:"#2A0A0A",color:C.red,border:"#4A1A1A"}};
+  const s=m[status]||m.safe;
+  return <span style={{padding:"2px 8px",borderRadius:3,fontSize:10,fontFamily:"monospace",background:s.bg,color:s.color,border:`1px solid ${s.border}`,letterSpacing:1}}>{s.label}</span>;
+}
+
+function RiskBadge({risk}){
+  const m={LOW:{bg:"#0A2818",color:C.green},MED:{bg:"#1A1800",color:C.amber},HIGH:{bg:"#2A1200",color:"#FF8C00"},CRIT:{bg:"#2A0A0A",color:C.red}};
+  const s=m[risk]||m.LOW;
+  return <span style={{padding:"1px 6px",borderRadius:2,fontSize:10,fontFamily:"monospace",background:s.bg,color:s.color,border:`1px solid ${s.color}33`}}>{risk}</span>;
+}
+
+function ActionBadge({action}){
+  const m={ALLOWED:{color:C.green},BLOCKED:{color:C.amber},FROZEN:{color:C.red}};
+  return <span style={{fontSize:11,fontFamily:"monospace",color:(m[action]||{color:C.muted}).color,fontWeight:700}}>{action}</span>;
+}
+
+function AnomalyBar({score}){
+  const pct=Math.round(score*100);
+  const color=score<0.3?C.green:score<0.6?C.amber:C.red;
+  return <div style={{display:"flex",alignItems:"center",gap:8}}>
+    <div style={{flex:1,height:4,background:C.border,borderRadius:2,overflow:"hidden"}}>
+      <div style={{width:`${pct}%`,height:"100%",background:color,borderRadius:2}}/>
+    </div>
+    <span style={{fontSize:11,color,fontFamily:"monospace",minWidth:32}}>{pct}%</span>
+  </div>;
+}
+
+function SpendBar({spent,limit}){
+  const pct=Math.min((spent/limit)*100,100);
+  const color=pct<60?C.electric:pct<85?C.amber:C.red;
+  return <div style={{display:"flex",alignItems:"center",gap:8}}>
+    <div style={{flex:1,height:3,background:C.border,borderRadius:2,overflow:"hidden"}}>
+      <div style={{width:`${pct}%`,height:"100%",background:color,borderRadius:2}}/>
+    </div>
+    <span style={{fontSize:10,color:C.muted,fontFamily:"monospace",minWidth:60}}>${spent}<span style={{color:C.gray}}>/${limit}</span></span>
+  </div>;
+}
+
+function LiveCounter({start,color}){
+  const [v,setV]=useState(start);
+  useEffect(()=>{const i=setInterval(()=>setV(x=>x+Math.floor(Math.random()*3)),2000);return()=>clearInterval(i)},[]);
+  return <span style={{color,fontFamily:"monospace",fontWeight:700}}>{v.toLocaleString()}</span>;
+}
+
+function App(){
+  const [tab,setTab]=useState("overview");
+  const [sel,setSel]=useState(null);
+  const [log,setLog]=useState(MCP_INIT);
+  const [tick,setTick]=useState(0);
+  const [agents,setAgents]=useState(AGENTS);
+
+  useEffect(()=>{
+    const tools=["price_feed","token_approve","swap_exact","transfer","read_balance","nft_bid","batch_pay","rebalance"];
+    const ags=["AGT-001","AGT-002","AGT-003","AGT-004"];
+    const risks=["LOW","LOW","LOW","MED","HIGH"];
+    const i=setInterval(()=>{
+      const risk=risks[Math.floor(Math.random()*risks.length)];
+      const now=new Date();
+      const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+      setLog(prev=>[{time:t,agent:ags[Math.floor(Math.random()*ags.length)],tool:tools[Math.floor(Math.random()*tools.length)],risk,action:risk==="HIGH"?"BLOCKED":"ALLOWED",reason:risk==="HIGH"?"Anomaly threshold exceeded":"Normal pattern"},...prev.slice(0,11)]);
+      setTick(x=>x+1);
+    },2500);
+    return()=>clearInterval(i);
+  },[]);
+
+  const freezeAgent=(id)=>setAgents(prev=>prev.map(a=>a.id===id?{...a,status:"frozen"}:a));
+  const blocked=log.filter(l=>l.action!=="ALLOWED").length;
+  const allowed=log.filter(l=>l.action==="ALLOWED").length;
+
+  const tabs=[{id:"overview",label:"OVERVIEW",icon:"◈"},{id:"compliance",label:"EU AI ACT",icon:"⚖"},{id:"baseline",label:"BASELINE AI",icon:"◎"},{id:"mcp",label:"MCP GATEWAY",icon:"⬡"},{id:"spendguard",label:"SPENDGUARD",icon:"⛊"}];
+
+  const exportCompliance=()=>{
+    const data={generated:new Date().toISOString(),project:"ShieldAI v3.0",standard:"EU AI Act 2024/1689",complianceScore:"83%",contract:"0xE03C389DF391549E44c2aa807576c9eE2956C2d8",network:"Arbitrum One",articles:COMPLIANCE_ITEMS,agents:agents.map(a=>({id:a.id,name:a.name,status:a.status,anomalyScore:a.anomaly,txToday:a.txToday})),disclaimer:"Technical tooling only. Not legal certification."};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download=`shieldai_compliance_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  };
+
+  return <div style={{minHeight:"100vh",background:C.bg,color:C.text,fontFamily:"'DM Mono','Fira Code',monospace"}}>
+
+    {/* TOPBAR */}
+    <div style={{borderBottom:`1px solid ${C.border}`,padding:"10px 20px",display:"flex",alignItems:"center",gap:12,background:C.surface,position:"sticky",top:0,zIndex:100}}>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <div style={{width:26,height:26,border:`2px solid ${C.electric}`,display:"flex",alignItems:"center",justifyContent:"center",background:C.electric+"22"}}>
+          <span style={{fontSize:12,color:C.electric}}>⛊</span>
+        </div>
+        <div>
+          <div style={{fontSize:13,fontWeight:500,color:C.white,letterSpacing:0.5}}>ShieldAI</div>
+          <div style={{fontSize:9,color:C.muted,letterSpacing:2}}>v3.0 · RUNTIME SECURITY</div>
+        </div>
+      </div>
+      <div style={{flex:1}}/>
+      {[{label:"AGENTS",val:<LiveCounter start={250847} color={C.electric}/>,dot:C.green},
+        {label:"EVENTS",val:<LiveCounter start={1284731} color={C.mint}/>,dot:C.mint},
+        {label:"BLOCKED",val:<LiveCounter start={4821} color={C.red}/>,dot:C.red},
+        {label:"CONTRACT",val:<span style={{color:C.electric,fontFamily:"monospace",fontSize:11,cursor:"pointer"}} onClick={()=>window.open("https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8","_blank")}>0xE03C...2d8 ↗</span>,dot:C.green},
+      ].map((s,i)=><div key={i} style={{padding:"4px 12px",borderLeft:`1px solid ${C.border}`,display:"flex",flexDirection:"column",gap:2}}>
+        <div style={{display:"flex",alignItems:"center",gap:5}}><PulseDot color={s.dot} size={6}/><span style={{fontSize:9,color:C.muted,letterSpacing:1.5}}>{s.label}</span></div>
+        <div style={{fontSize:13}}>{s.val}</div>
+      </div>)}
+      <div style={{padding:"4px 12px",borderLeft:`1px solid ${C.border}`}}>
+        <div style={{fontSize:9,color:C.muted,letterSpacing:1.5,marginBottom:2}}>EU AI ACT</div>
+        <div style={{fontSize:10,padding:"2px 8px",background:C.green+"22",color:C.green,border:`1px solid ${C.green}44`,borderRadius:3}}>COMPLIANT</div>
+      </div>
+    </div>
+
+    {/* TABS */}
+    <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.surface,padding:"0 20px"}}>
+      {tabs.map(t=><button key={t.id} className="tab-btn" onClick={()=>setTab(t.id)}
+        style={{padding:"10px 18px",fontSize:10,letterSpacing:1.5,fontFamily:"inherit",fontWeight:500,
+          background:tab===t.id?C.card:"transparent",color:tab===t.id?C.electric:C.muted,
+          borderBottom:tab===t.id?`2px solid ${C.electric}`:"2px solid transparent",transition:"all 0.2s"}}>
+        {t.icon} {t.label}
+      </button>)}
+    </div>
+
+    {/* CONTENT */}
+    <div style={{padding:20,maxWidth:1400,margin:"0 auto"}}>
+
+      {/* OVERVIEW */}
+      {tab==="overview" && <div style={{animation:"fadeIn 0.3s ease"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+          <div style={{width:3,height:32,background:C.electric,borderRadius:2}}/>
+          <div><span style={{fontSize:11,color:C.electric,fontFamily:"monospace",letterSpacing:2,fontWeight:700}}>◈ AGENT MONITOR</span>
+          <div style={{fontSize:11,color:C.muted,marginTop:2}}>Real-time protection across all monitored agents</div></div>
+          <span style={{padding:"1px 6px",borderRadius:2,fontSize:9,background:C.electric+"22",color:C.electric,border:`1px solid ${C.electric}44`,fontFamily:"monospace",marginLeft:8}}>LIVE</span>
+        </div>
+
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,overflow:"hidden"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 80px 80px 130px 110px 70px 80px 100px",padding:"8px 16px",borderBottom:`1px solid ${C.border}`,background:C.surface}}>
+            {["AGENT","CHAIN","STATUS","ANOMALY","SPEND TODAY","TX/DAY","VERIFIED","ACTION"].map(h=><div key={h} style={{fontSize:9,color:C.muted,letterSpacing:1.5}}>{h}</div>)}
+          </div>
+          {agents.map(a=><div key={a.id} className="agent-row" onClick={()=>setSel(sel?.id===a.id?null:a)}
+            style={{display:"grid",gridTemplateColumns:"1fr 80px 80px 130px 110px 70px 80px 100px",
+              padding:"10px 16px",borderBottom:`1px solid ${C.border}22`,
+              background:sel?.id===a.id?C.border+"33":"transparent",alignItems:"center"}}>
+            <div><div style={{fontSize:12,color:C.white,fontWeight:500}}>{a.name}</div><div style={{fontSize:10,color:C.gray,fontFamily:"monospace"}}>{a.id}</div></div>
+            <span style={{padding:"2px 8px",borderRadius:3,fontSize:10,background:a.chain==="Arbitrum"?C.electric+"18":a.chain==="Mantle"?C.mint+"18":C.amber+"18",color:a.chain==="Arbitrum"?C.electric:a.chain==="Mantle"?C.mint:C.amber,border:`1px solid ${a.chain==="Arbitrum"?C.electric:a.chain==="Mantle"?C.mint:C.amber}44`,fontFamily:"monospace"}}>{a.chain}</span>
+            <StatusBadge status={a.status}/>
+            <AnomalyBar score={a.anomaly}/>
+            <SpendBar spent={a.spentToday} limit={a.limit}/>
+            <span style={{fontSize:12,color:C.text,fontFamily:"monospace"}}>{a.txToday}</span>
+            <span style={{fontSize:11,color:a.verified?C.green:C.muted}}>{a.verified?"✓ YES":"✗ NO"}</span>
+            <div>{a.status!=="frozen"
+              ?<button className="freeze-btn" onClick={e=>{e.stopPropagation();freezeAgent(a.id);}}
+                  style={{padding:"3px 8px",fontSize:9,letterSpacing:1,fontFamily:"inherit",background:C.red+"22",color:C.red,border:`1px solid ${C.red}44`,borderRadius:3,cursor:"pointer"}}>FREEZE</button>
+              :<span style={{fontSize:9,color:C.red,letterSpacing:1,animation:"blink 1s infinite"}}>● FROZEN</span>}
+            </div>
+          </div>)}
+        </div>
+
+        {sel && <div style={{marginTop:16,background:C.card,border:`1px solid ${C.electric}44`,borderRadius:6,padding:20,animation:"fadeIn 0.2s ease"}}>
+          <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+            <div style={{flex:1,minWidth:200}}>
+              <div style={{fontSize:9,color:C.muted,letterSpacing:2,marginBottom:8}}>AGENT DETAIL</div>
+              <div style={{fontSize:18,color:C.white}}>{sel.name}</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:4}}>{sel.id} · {sel.chain}</div>
+            </div>
+            {[{l:"ANOMALY",v:(sel.anomaly*100).toFixed(0)+"%",c:sel.anomaly<0.3?C.green:sel.anomaly<0.6?C.amber:C.red},
+              {l:"TX TODAY",v:sel.txToday,c:C.electric},{l:"SPENT",v:"$"+sel.spentToday,c:C.mint},
+              {l:"LIMIT",v:"$"+sel.limit,c:C.muted},{l:"LAST TX",v:sel.lastTx,c:C.text}
+            ].map((s,i)=><div key={i} style={{minWidth:100}}>
+              <div style={{fontSize:9,color:C.muted,letterSpacing:1.5,marginBottom:4}}>{s.l}</div>
+              <div style={{fontSize:20,color:s.c,fontFamily:"monospace",fontWeight:700}}>{s.v}</div>
+            </div>)}
+          </div>
+        </div>}
+
+        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginTop:16}}>
+          {[{l:"SAFE AGENTS",v:agents.filter(a=>a.status==="safe").length,t:agents.length,c:C.green},
+            {l:"WARNINGS",v:agents.filter(a=>a.status==="warn").length,t:agents.length,c:C.amber},
+            {l:"FROZEN",v:agents.filter(a=>a.status==="frozen").length,t:agents.length,c:C.red},
+            {l:"MCP BLOCKED",v:blocked,t:blocked+allowed,c:C.electric},
+          ].map((s,i)=><div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:16}}>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:2,marginBottom:8}}>{s.l}</div>
+            <div style={{display:"flex",alignItems:"baseline",gap:6}}>
+              <span style={{fontSize:32,color:s.c,fontWeight:700}}>{s.v}</span>
+              <span style={{fontSize:13,color:C.gray}}>/ {s.t}</span>
+            </div>
+            <div style={{marginTop:8,height:2,background:C.border,borderRadius:1}}>
+              <div style={{width:`${(s.v/Math.max(s.t,1))*100}%`,height:"100%",background:s.c,borderRadius:1}}/>
+            </div>
+          </div>)}
+        </div>
+      </div>}
+
+      {/* EU AI ACT */}
+      {tab==="compliance" && <div style={{animation:"fadeIn 0.3s ease"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+          <div style={{width:3,height:32,background:C.mint,borderRadius:2}}/>
+          <div><span style={{fontSize:11,color:C.mint,fontFamily:"monospace",letterSpacing:2,fontWeight:700}}>⚖ EU AI ACT COMPLIANCE LOGGER</span>
+          <div style={{fontSize:11,color:C.muted,marginTop:2}}>Automated audit trail mapped to EU AI Act articles</div></div>
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:16,marginBottom:16}}>
+          <div style={{background:C.card,border:`1px solid ${C.mint}44`,borderRadius:6,padding:20,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:2,marginBottom:12}}>COMPLIANCE SCORE</div>
+            <svg width={100} height={100} viewBox="0 0 100 100">
+              <circle cx={50} cy={50} r={42} fill="none" stroke={C.border} strokeWidth={8}/>
+              <circle cx={50} cy={50} r={42} fill="none" stroke={C.mint} strokeWidth={8} strokeDasharray={`${(5/6)*264} 264`} strokeLinecap="round" transform="rotate(-90 50 50)"/>
+              <text x={50} y={50} textAnchor="middle" dominantBaseline="central" fill={C.mint} fontSize={22} fontWeight={700}>83%</text>
+              <text x={50} y={66} textAnchor="middle" fill={C.muted} fontSize={10}>5 / 6</text>
+            </svg>
+            <div style={{marginTop:12,padding:"4px 12px",background:C.mint+"22",color:C.mint,border:`1px solid ${C.mint}44`,borderRadius:3,fontSize:10,letterSpacing:1}}>SUBSTANTIALLY COMPLIANT</div>
+          </div>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:20}}>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:2,marginBottom:12}}>CONTRACT ON-CHAIN</div>
+            <div style={{fontSize:12,color:C.text,lineHeight:1.7,marginBottom:12}}>ShieldAI automatically generates EU AI Act compliant audit logs for every agent action. All logs are stored immutably on-chain.</div>
+            <div style={{padding:"8px 12px",background:C.surface,border:`1px solid ${C.electric}33`,borderRadius:4,marginBottom:12}}>
+              <div style={{fontSize:9,color:C.muted,letterSpacing:1.5,marginBottom:4}}>SPENDGUARD CONTRACT · ARBITRUM ONE</div>
+              <div style={{fontSize:11,color:C.electric,fontFamily:"monospace",cursor:"pointer"}} onClick={()=>window.open("https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8","_blank")}>
+                0xE03C389DF391549E44c2aa807576c9eE2956C2d8 ↗
+              </div>
+              <div style={{fontSize:9,color:C.gray,marginTop:4}}>Block #448899709 · Verified 2026-04-04 · Exact Match ✓</div>
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <div style={{padding:"4px 10px",background:C.green+"22",color:C.green,border:`1px solid ${C.green}44`,borderRadius:3,fontSize:10}}>5 PASSED</div>
+              <div style={{padding:"4px 10px",background:C.amber+"22",color:C.amber,border:`1px solid ${C.amber}44`,borderRadius:3,fontSize:10}}>1 WARNING</div>
+              <div style={{padding:"4px 10px",background:C.red+"22",color:C.red,border:`1px solid ${C.red}44`,borderRadius:3,fontSize:10}}>0 FAILED</div>
+            </div>
+          </div>
+        </div>
+
+        {COMPLIANCE_ITEMS.map((item,i)=><div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:"14px 20px",borderLeft:`3px solid ${item.status==="pass"?C.green:C.amber}`,marginBottom:8}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <span style={{fontSize:10,color:item.status==="pass"?C.green:C.amber,fontFamily:"monospace",minWidth:56,fontWeight:700}}>{item.article}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:12,color:C.white,fontWeight:500}}>{item.title}</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:3}}>{item.detail}</div>
+            </div>
+            <span style={{fontSize:11,color:item.status==="pass"?C.green:C.amber,fontFamily:"monospace"}}>{item.status==="pass"?"✓ PASS":"⚠ WARN"}</span>
+          </div>
+        </div>)}
+
+        <div style={{marginTop:16,display:"flex",gap:10}}>
+          <button onClick={exportCompliance} style={{padding:"10px 20px",background:C.mint+"22",color:C.mint,border:`1px solid ${C.mint}44`,borderRadius:4,fontSize:10,letterSpacing:1.5,fontFamily:"inherit",cursor:"pointer"}}>
+            ↓ EXPORT EVIDENCE PACKAGE
+          </button>
+          <button onClick={()=>window.open("https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8","_blank")} style={{padding:"10px 20px",background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:4,fontSize:10,letterSpacing:1.5,fontFamily:"inherit",cursor:"pointer"}}>
+            ↗ VIEW ON-CHAIN AUDIT LOG
+          </button>
+        </div>
+      </div>}
+
+      {/* BASELINE AI */}
+      {tab==="baseline" && <div style={{animation:"fadeIn 0.3s ease"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+          <div style={{width:3,height:32,background:C.amber,borderRadius:2}}/>
+          <div><span style={{fontSize:11,color:C.amber,fontFamily:"monospace",letterSpacing:2,fontWeight:700}}>◎ BEHAVIOR BASELINE AI</span>
+          <div style={{fontSize:11,color:C.muted,marginTop:2}}>Each agent learns its own normal — 72h training window</div></div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          {agents.map((agent,i)=>{
+            const colors=[C.electric,C.mint,C.amber,C.green,C.red];
+            const color=colors[i];
+            const baselineVals=[2,3,8,12,9,6];
+            const avg=Math.round(baselineVals.reduce((a,b)=>a+b,0)/baselineVals.length);
+            const deviation=avg>0?((agent.txToday-avg)/avg*100).toFixed(0):0;
+            const isAnomalous=Math.abs(deviation)>50;
+            return <div key={agent.id} style={{background:C.card,border:`1px solid ${isAnomalous?C.red+"66":C.border}`,borderRadius:6,padding:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+                <div><div style={{fontSize:12,color:C.white,fontWeight:500}}>{agent.name}</div><div style={{fontSize:10,color:C.muted,marginTop:2}}>{agent.id}</div></div>
+                <StatusBadge status={agent.status}/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+                {[{l:"TX/DAY NOW",v:agent.txToday,c:color},{l:"AVG BASELINE",v:avg,c:C.muted},{l:"DEVIATION",v:deviation+"%",c:isAnomalous?C.red:C.green}]
+                .map((s,j)=><div key={j}>
+                  <div style={{fontSize:9,color:C.muted,letterSpacing:1.5}}>{s.l}</div>
+                  <div style={{fontSize:18,color:s.c,fontFamily:"monospace",fontWeight:700,marginTop:4}}>{s.v}</div>
+                </div>)}
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{flex:1,height:3,background:C.border,borderRadius:2}}>
+                  <div style={{width:`${Math.min(agent.anomaly*100,100)}%`,height:"100%",background:isAnomalous?C.red:color,borderRadius:2}}/>
+                </div>
+                <span style={{fontSize:10,color:isAnomalous?C.red:C.muted,fontFamily:"monospace"}}>RISK {(agent.anomaly*100).toFixed(0)}%</span>
+              </div>
+            </div>;
+          })}
+        </div>
+        <div style={{marginTop:16,background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:16}}>
+          <div style={{fontSize:9,color:C.muted,letterSpacing:2,marginBottom:12}}>MODEL STATUS</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+            {[{l:"TRAINING WINDOW",v:"72 hours",s:"minimum before enforcement"},{l:"MODEL TYPE",v:"ISOLATION FOREST",s:"on-chain inference via Giza"},{l:"FALSE POSITIVE RATE",v:"< 0.8%",s:"last 30 days"}]
+            .map((s,i)=><div key={i}><div style={{fontSize:9,color:C.muted,letterSpacing:1.5}}>{s.l}</div><div style={{fontSize:14,color:C.amber,fontWeight:700,margin:"4px 0"}}>{s.v}</div><div style={{fontSize:10,color:C.gray}}>{s.s}</div></div>)}
+          </div>
+        </div>
+      </div>}
+
+      {/* MCP GATEWAY */}
+      {tab==="mcp" && <div style={{animation:"fadeIn 0.3s ease"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+          <div style={{width:3,height:32,background:C.electric,borderRadius:2}}/>
+          <div><span style={{fontSize:11,color:C.electric,fontFamily:"monospace",letterSpacing:2,fontWeight:700}}>⬡ MCP SECURITY GATEWAY</span>
+          <div style={{fontSize:11,color:C.muted,marginTop:2}}>Every agent tool call intercepted, scored, and enforced before execution</div></div>
+          <span style={{padding:"1px 6px",borderRadius:2,fontSize:9,background:C.electric+"22",color:C.electric,border:`1px solid ${C.electric}44`,fontFamily:"monospace",marginLeft:8}}>LIVE STREAM</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 280px",gap:16}}>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,overflow:"hidden"}}>
+            <div style={{padding:"10px 16px",borderBottom:`1px solid ${C.border}`,background:C.surface,display:"flex",alignItems:"center",gap:8}}>
+              <PulseDot color={C.electric} size={7}/>
+              <span style={{fontSize:10,color:C.electric,letterSpacing:1.5}}>LIVE MCP INTERCEPT LOG</span>
+              <span style={{marginLeft:"auto",fontSize:9,color:C.muted}}>TICK #{tick}</span>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"70px 70px 130px 55px 70px 1fr",padding:"6px 16px",borderBottom:`1px solid ${C.border}`,background:C.surface}}>
+              {["TIME","AGENT","TOOL","RISK","ACTION","REASON"].map(h=><div key={h} style={{fontSize:9,color:C.muted,letterSpacing:1.5}}>{h}</div>)}
+            </div>
+            {log.map((call,i)=><div key={i} style={{display:"grid",gridTemplateColumns:"70px 70px 130px 55px 70px 1fr",padding:"8px 16px",borderBottom:`1px solid ${C.border}11`,background:i===0?C.border+"22":"transparent",alignItems:"center"}}>
+              <span style={{fontSize:10,color:C.gray,fontFamily:"monospace"}}>{call.time}</span>
+              <span style={{fontSize:10,color:C.electric,fontFamily:"monospace"}}>{call.agent}</span>
+              <span style={{fontSize:10,color:C.text,fontFamily:"monospace"}}>{call.tool}</span>
+              <RiskBadge risk={call.risk}/>
+              <ActionBadge action={call.action}/>
+              <span style={{fontSize:10,color:C.muted}}>{call.reason}</span>
+            </div>)}
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {[{l:"TOTAL INTERCEPTED",v:log.length*847,c:C.electric},{l:"BLOCKED THIS SESSION",v:blocked,c:C.red},{l:"THREATS PREVENTED",v:3,c:C.amber},{l:"AVG LATENCY",v:"< 2ms",c:C.green}]
+            .map((s,i)=><div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:"14px 16px"}}>
+              <div style={{fontSize:9,color:C.muted,letterSpacing:1.5,marginBottom:6}}>{s.l}</div>
+              <div style={{fontSize:24,color:s.c,fontWeight:700}}>{s.v}</div>
+            </div>)}
+            <div style={{background:C.card,border:`1px solid ${C.amber}44`,borderRadius:6,padding:14}}>
+              <div style={{fontSize:9,color:C.amber,letterSpacing:1.5,marginBottom:8}}>HOW IT WORKS</div>
+              <div style={{fontSize:11,color:C.text,lineHeight:1.7}}>ShieldAI sits between every AI agent and its MCP tools. Each call is scored against the agent's baseline before execution.</div>
+            </div>
+          </div>
+        </div>
+      </div>}
+
+      {/* SPENDGUARD */}
+      {tab==="spendguard" && <div style={{animation:"fadeIn 0.3s ease"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+          <div style={{width:3,height:32,background:C.mint,borderRadius:2}}/>
+          <div><span style={{fontSize:11,color:C.mint,fontFamily:"monospace",letterSpacing:2,fontWeight:700}}>⛊ SPENDGUARD</span>
+          <div style={{fontSize:11,color:C.muted,marginTop:2}}>On-chain spend policies enforced before every transaction</div></div>
+          <span style={{padding:"1px 6px",borderRadius:2,fontSize:9,background:C.mint+"22",color:C.mint,border:`1px solid ${C.mint}44`,fontFamily:"monospace",marginLeft:8}}>ON-CHAIN</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+          {agents.map((agent,i)=><div key={agent.id} style={{background:C.card,border:`1px solid ${agent.status==="frozen"?C.red+"66":agent.status==="warn"?C.amber+"44":C.border}`,borderRadius:6,padding:16}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:14}}>
+              <div><div style={{fontSize:13,color:C.white,fontWeight:500}}>{agent.name}</div><div style={{fontSize:10,color:C.muted,marginTop:2}}>{agent.id}</div></div>
+              <StatusBadge status={agent.status}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {[{l:"DAILY LIMIT",v:"$"+agent.limit,c:C.mint},{l:"SPENT TODAY",v:"$"+agent.spentToday,c:(agent.spentToday/agent.limit)>0.85?C.red:C.text},{l:"TX COUNT",v:agent.txToday+" / day",c:C.text},{l:"ANOMALY",v:(agent.anomaly*100).toFixed(0)+"%",c:agent.anomaly>0.6?C.red:agent.anomaly>0.3?C.amber:C.green}]
+              .map((r,j)=><div key={j} style={{display:"flex",justifyContent:"space-between",padding:"6px 10px",background:C.surface,borderRadius:4,border:`1px solid ${C.border}`}}>
+                <span style={{fontSize:10,color:C.muted,letterSpacing:1}}>{r.l}</span>
+                <span style={{fontSize:11,color:r.c,fontFamily:"monospace",fontWeight:700}}>{r.v}</span>
+              </div>)}
+            </div>
+            <div style={{marginTop:12}}><SpendBar spent={agent.spentToday} limit={agent.limit}/></div>
+            <div style={{marginTop:12,display:"flex",gap:8}}>
+              <div style={{padding:"3px 8px",background:C.green+"22",color:C.green,border:`1px solid ${C.green}33`,borderRadius:3,fontSize:9,letterSpacing:1}}>✓ WHITELIST ACTIVE</div>
+              {agent.status==="frozen" && <div style={{padding:"3px 8px",background:C.red+"22",color:C.red,border:`1px solid ${C.red}33`,borderRadius:3,fontSize:9,letterSpacing:1,animation:"blink 1s infinite"}}>● FROZEN BY SHIELDAI</div>}
+            </div>
+          </div>)}
+        </div>
+        <div style={{marginTop:16,background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:16}}>
+          <div style={{fontSize:9,color:C.muted,letterSpacing:2,marginBottom:12}}>DEPLOYED CONTRACTS</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+            {[{n:"Arbitrum One",a:"0xE03C...2d8",s:"LIVE ✓",c:C.electric,url:"https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8"},
+              {n:"Mantle",a:"Q2 2026",s:"SOON",c:C.mint,url:null},
+              {n:"Base",a:"Q3 2026",s:"PLANNED",c:C.muted,url:null}
+            ].map((c,i)=><div key={i} onClick={()=>c.url&&window.open(c.url,"_blank")} style={{padding:12,background:C.surface,border:`1px solid ${c.c}44`,borderRadius:4,cursor:c.url?"pointer":"default"}}>
+              <div style={{fontSize:9,color:C.muted,letterSpacing:1.5}}>{c.n}</div>
+              <div style={{fontSize:11,color:c.c,fontFamily:"monospace",margin:"4px 0"}}>{c.a}</div>
+              <div style={{fontSize:9,padding:"2px 6px",display:"inline-block",background:c.c+"22",color:c.c,borderRadius:2,letterSpacing:1}}>{c.s}</div>
+              {c.url&&<span style={{fontSize:9,color:C.gray,marginLeft:6}}>↗ Arbiscan</span>}
+            </div>)}
+          </div>
+          <div style={{marginTop:12,padding:"8px 12px",background:C.surface,border:`1px solid ${C.electric}33`,borderRadius:4}}>
+            <div style={{fontSize:9,color:C.muted,letterSpacing:1.5,marginBottom:4}}>DEPLOYMENT TX</div>
+            <div style={{fontSize:10,color:C.electric,fontFamily:"monospace",cursor:"pointer",wordBreak:"break-all"}} onClick={()=>window.open("https://arbiscan.io/tx/0x1a4bddcf4312c3dfe71796cb05551304b0dadf582d97b9888b520c2ee2f9c950","_blank")}>
+              0x1a4bddcf4312c3dfe71796cb05551304b0dadf582d97b9888b520c2ee2f9c950 ↗
+            </div>
+            <div style={{fontSize:9,color:C.gray,marginTop:4}}>Block #448899709 · Verified 2026-04-04 08:51:41 UTC · Exact Match ✓</div>
+          </div>
+        </div>
+      </div>}
+
+    </div>
+
+    {/* FOOTER */}
+    <div style={{borderTop:`1px solid ${C.border}`,padding:"12px 20px",display:"flex",alignItems:"center",gap:12,background:C.surface,marginTop:20}}>
+      <span style={{fontSize:9,color:C.gray,letterSpacing:2}}>SHIELDAI v3.0</span>
+      <span style={{fontSize:9,color:C.border}}>|</span>
+      <span style={{fontSize:9,color:C.muted,cursor:"pointer"}} onClick={()=>window.open("https://getshieldai.xyz","_blank")}>getshieldai.xyz</span>
+      <span style={{fontSize:9,color:C.border}}>|</span>
+      <span style={{fontSize:9,color:C.muted}}>@ShieldAI2026</span>
+      <span style={{fontSize:9,color:C.border}}>|</span>
+      <span style={{fontSize:9,color:C.muted,cursor:"pointer"}} onClick={()=>window.open("https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8","_blank")}>SpendGuard on Arbitrum ↗</span>
+      <div style={{flex:1}}/>
+      <div style={{display:"flex",alignItems:"center",gap:6}}>
+        <PulseDot color={C.green} size={6}/>
+        <span style={{fontSize:9,color:C.green,letterSpacing:1}}>ALL SYSTEMS OPERATIONAL</span>
+      </div>
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
 </body>
 </html>
