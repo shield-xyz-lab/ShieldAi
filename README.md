@@ -1,6 +1,6 @@
   [README.md](https://github.com/user-attachments/files/...)
 # ShieldAI 🛡️
-
+## 🔴 [LIVE DASHBOARD →](https://getshieldai.xyz/dashboard.html)
 > **Before your AI agent spends your money, someone should be watching.**
 
 [![npm](https://img.shields.io/npm/v/@shieldai-xyz/sdk?label=npm&color=blue)](https://www.npmjs.com/package/@shieldai-xyz/sdk)
