@@ -1,4 +1,4 @@
-[README_ShieldAI_FINAL (4).md](https://github.com/user-attachments/files/26484281/README_ShieldAI_FINAL.4.md)
+  [README.md](https://github.com/user-attachments/files/...)
 # ShieldAI 🛡️
 
 > **Before your AI agent spends your money, someone should be watching.**
