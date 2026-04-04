@@ -1,148 +1,235 @@
+[README_ShieldAI_FINAL (4).md](https://github.com/user-attachments/files/26484281/README_ShieldAI_FINAL.4.md)
 # ShieldAI 🛡️
 
 > **Before your AI agent spends your money, someone should be watching.**
 
-Real-time on-chain monitoring and spend control for autonomous AI agents — because a compromised agent doesn't ask for permission.
-
+[![npm](https://img.shields.io/npm/v/@shieldai-xyz/sdk?label=npm&color=blue)](https://www.npmjs.com/package/@shieldai-xyz/sdk)
+[![Contract](https://img.shields.io/badge/Arbitrum-verified-%230B4FFF)](https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8)
+[![Dashboard](https://img.shields.io/badge/Dashboard-live-%2310B981)](https://getshieldai.xyz/dashboard.html)
+[![Giveth](https://img.shields.io/badge/Giveth-support-%23E1458D)](https://giveth.io/project/shieldai-ai-agent-security-monitoring-layer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Network: Mantle](https://img.shields.io/badge/Network-Mantle-brightgreen)](https://mantle.xyz)
-[![Network: Arbitrum](https://img.shields.io/badge/Network-Arbitrum-blue)](https://arbitrum.io)
 [![Twitter](https://img.shields.io/badge/Twitter-@ShieldAI2026-1DA1F2)](https://twitter.com/ShieldAI2026)
 
----
+**Runtime security for autonomous AI agents** — spend controls, anomaly detection, MCP gateway, EU AI Act compliance.
 
-## The Problem
-
-AI agents are executing transactions autonomously — buying compute, paying APIs, managing DeFi positions. But:
-
-- **No spend limits** → a compromised agent can drain your entire wallet
-- **No visibility** → you have no idea what your agent did while you slept
-- **No kill switch** → by the time you notice, it's too late
-
-ShieldAI fixes this with a lightweight monitoring and enforcement layer you install in 3 lines.
+$45M was lost to AI agent exploits in Q1 2026. ShieldAI is the open-source answer.
 
 ---
 
-## Quickstart
+## 🚀 Quickstart
 
 ```bash
-npm install @shieldai/sdk
+npm install @shieldai-xyz/sdk
 ```
 
 ```typescript
-import { ShieldAI } from '@shieldai/sdk'
+import { ShieldAI } from '@shieldai-xyz/sdk'
 
 const shield = new ShieldAI({
   agentWallet: '0xYourAgentWallet',
-  dailyLimit: 50,        // USD equivalent
+  dailyLimit: 50,        // USD
   whitelist: ['0x...'],  // approved counterparties
-  alertWebhook: 'https://your-webhook.com'
 })
 
-shield.watch() // that's it
+shield.watch() // agent is now monitored
 ```
 
-Your agent is now monitored. You'll receive alerts for:
-- Transactions exceeding limits
-- Interactions with non-whitelisted addresses
-- Anomalous spending velocity
-- Suspicious contract calls
+That's it. Your agent now has spend limits, anomaly detection, and a kill switch.
 
 ---
 
-## Architecture — 10 Security Layers
+## 🔴 Live Demo
+
+**[getshieldai.xyz/dashboard.html](https://getshieldai.xyz/dashboard.html)**
+
+Real-time dashboard showing:
+- Agent monitoring with anomaly scores
+- MCP Gateway live intercept log
+- EU AI Act compliance status
+- SpendGuard on-chain policies
+
+---
+
+## ⛓️ On-Chain Contract
+
+SpendGuard.sol is deployed and verified on **Arbitrum One**:
+
+| | |
+|---|---|
+| **Contract** | [`0xE03C389DF391549E44c2aa807576c9eE2956C2d8`](https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8) |
+| **Network** | Arbitrum One |
+| **Verified** | 2026-04-04 · Exact Match ✓ |
+| **Block** | #448899709 |
+| **TX** | [`0x1a4bddcf...f9c950`](https://arbiscan.io/tx/0x1a4bddcf4312c3dfe71796cb05551304b0dadf582d97b9888b520c2ee2f9c950) |
+
+---
+
+## 🛡️ 12-Layer Architecture
 
 | Layer | Name | Function |
 |-------|------|----------|
 | L1 | Input Validator | Sanitizes all agent inputs |
 | L2 | Intent Classifier | Detects malicious instruction patterns |
 | L3 | Permission Guard | Enforces capability boundaries |
-| L4 | Spend Controller | Hard limits on transaction values |
+| L4 | SpendGuard | Hard limits on transaction values |
 | L5 | Counterparty Filter | Whitelist/blacklist enforcement |
-| L6 | Anomaly Detector | AI-powered behavioral analysis |
+| L6 | Anomaly Detector | Isolation Forest behavioral analysis |
 | L7 | Outbound Firewall | Blocks unauthorized external calls |
 | L8 | Package Guardian | Validates smart contract interactions |
 | L9 | Outcome Verifier | Post-execution result validation |
 | L10 | Audit Logger | Immutable on-chain activity log |
+| L11 | MCP Gateway | Intercepts every tool call before execution |
+| L12 | EU AI Act Logger | Auto-generates compliance evidence |
 
 ---
 
-## Live Demo
+## 📦 SDK Usage
 
-🔗 **[shield-xyz-lab.github.io/ShieldAi](https://shield-xyz-lab.github.io/ShieldAi)**
-
-Interactive demos for all 10 layers — see each protection mechanism in action.
-
----
-
-## Deployments
-
-| Network | Contract | Status |
-|---------|----------|--------|
-| Mantle Testnet | `0x...` | ✅ Live |
-| Arbitrum Testnet | `0x...` | ✅ Live |
-| Mantle Mainnet | `0x...` | 🔜 Q2 2026 |
-
----
-
-## SDK Reference
+### Validate Transactions
 
 ```typescript
-// Monitor an agent
-const shield = new ShieldAI({ agentWallet, dailyLimit, whitelist })
-shield.watch()
+const result = await shield.validate({
+  from: agentWallet,
+  to: '0xRecipient',
+  amountUSD: 10,
+  timestamp: Date.now()
+})
 
-// Check agent status
+if (result.allowed) {
+  executeTransaction()
+} else {
+  console.log('BLOCKED:', result.reason)
+}
+```
+
+### MCP Gateway
+
+```typescript
+// Intercept every MCP tool call before execution
+const result = await shield.interceptMCP({
+  tool: 'uniswap_swap',
+  params: { tokenIn: '0x...', amountIn: '1000000' }
+})
+
+if (result.allowed) executeMCPCall()
+// Automatically blocks: velocity attacks, non-whitelisted contracts, critical tools
+```
+
+### EU AI Act Compliance
+
+```typescript
+// Generate compliance report (Art. 9, 13, 14, 72)
+const report = shield.getComplianceReport()
+console.log(report.score) // '83%'
+
+// Export as JSON for regulatory inspection
+const json = shield.exportCompliance()
+```
+
+### Agent Status
+
+```typescript
 const status = await shield.getStatus()
-// → { txToday: 12, spentToday: 18.50, anomalyScore: 0.02, status: 'safe' }
+// {
+//   status: 'safe' | 'warn' | 'frozen',
+//   anomalyScore: 0.03,
+//   txToday: 12,
+//   spentToday: 18.50,
+//   remainingLimit: 31.50,
+// }
+```
 
-// Pause agent
-await shield.pause()
+### Alerts
 
-// Get audit log
-const log = await shield.getAuditLog({ last: 50 })
+```typescript
+shield.onAlert((alert) => {
+  console.log(alert.type, alert.severity)
+  // Send to Slack, Telegram, PagerDuty...
+})
 ```
 
 ---
 
-## Supported Networks
+## 🔐 Security Features
 
-- **Mantle** (primary)
-- **Arbitrum One & Nova**
-- **Base**
-- **Ethereum**
-
----
-
-## Roadmap
-
-- [x] 10-layer architecture design
-- [x] Interactive layer demos (GitHub Pages)
-- [x] SDK alpha
-- [ ] Mainnet deployment — Q2 2026
-- [ ] Dashboard UI — Q2 2026
-- [ ] Real-time alert webhooks — Q3 2026
-- [ ] Multi-agent monitoring — Q3 2026
+| Feature | Description |
+|---------|-------------|
+| **SpendGuard** | Daily + per-tx limits enforced on every transaction |
+| **Whitelist** | Only approved counterparties can receive funds |
+| **Anomaly Detection** | Isolation Forest baseline — auto-freeze on anomaly |
+| **MCP Gateway** | Intercepts every tool call before execution |
+| **Kill Switch** | Manual freeze + auto-freeze on critical anomaly |
+| **EU AI Act Logs** | Auto-generates Art. 9, 13, 14, 72 compliance evidence |
 
 ---
 
-## Grant Support
+## ⚖️ EU AI Act Compliance
+
+ShieldAI automatically generates compliance evidence for:
+
+| Article | Requirement | Status |
+|---------|-------------|--------|
+| Art. 9 | Risk Management System | ✅ SpendGuard active |
+| Art. 13 | Transparency & Logging | ✅ All actions logged on-chain |
+| Art. 14 | Human Oversight | ✅ Kill-switch + owner alerts |
+| Art. 15 | Accuracy & Robustness | ✅ Behavioral baseline AI |
+| Art. 17 | Quality Management | ✅ SpendGuard policies audited |
+| Art. 72 | Incident Reporting | ✅ Auto-generated incident logs |
+
+> ⚠️ ShieldAI provides technical tooling to support EU AI Act compliance. This is not legal certification.
+
+---
+
+## 🌐 Supported Networks
+
+| Network | SpendGuard | Status |
+|---------|------------|--------|
+| Arbitrum One | `0xE03C...2d8` | ✅ Live |
+| Mantle | Coming Q2 2026 | 🔜 |
+| Base | Coming Q3 2026 | 🔜 |
+
+---
+
+## 📋 Roadmap
+
+- [x] 12-layer security architecture
+- [x] SpendGuard.sol deployed on Arbitrum One (verified)
+- [x] `@shieldai-xyz/sdk` published to npm
+- [x] Live dashboard at getshieldai.xyz
+- [x] EU AI Act compliance logger
+- [x] MCP Security Gateway
+- [ ] Mantle mainnet deployment — Q2 2026
+- [ ] Dashboard UI with real wallet connection — Q2 2026
+- [ ] Behavior baseline on-chain inference — Q3 2026
+- [ ] Base + Solana integration — Q3 2026
+- [ ] TEE integration — Q4 2026
+
+---
+
+## 🏆 Grant Support
 
 ShieldAI is supported by:
-- Mantle x HackQuest Global Accelerator (application in progress)
-- Arbitrum Ecosystem Grants (application prepared)
+- **Mantle x HackQuest Global Accelerator** — application submitted
+- **Arbitrum Ecosystem Grants** — application prepared
+- **Giveth** — [giveth.io/project/shieldai](https://giveth.io/project/shieldai-ai-agent-security-monitoring-layer)
 
 ---
 
-## Contributing
+## 🔗 Links
 
-Issues, PRs and feedback welcome. If you're building AI agents and want to integrate ShieldAI, open an issue — we'll help with integration.
+| | |
+|---|---|
+| 🌐 Website | [getshieldai.xyz](https://getshieldai.xyz) |
+| 📊 Dashboard | [getshieldai.xyz/dashboard.html](https://getshieldai.xyz/dashboard.html) |
+| 📦 npm | [@shieldai-xyz/sdk](https://www.npmjs.com/package/@shieldai-xyz/sdk) |
+| ⛓️ Contract | [Arbiscan](https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8) |
+| 🐦 Twitter | [@ShieldAI2026](https://twitter.com/ShieldAI2026) |
+| 💜 Giveth | [Support ShieldAI](https://giveth.io/project/shieldai-ai-agent-security-monitoring-layer) |
 
 ---
 
-## License
+## 📄 License
 
 MIT © 2026 ShieldAI
 
-**Twitter:** [@ShieldAI2026](https://twitter.com/ShieldAI2026)  
-**Website:** [getshieldai.xyz](https://getshieldai.xyz)
+> *Before your AI agent spends your money, someone should be watching.*
