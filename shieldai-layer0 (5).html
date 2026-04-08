@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldAI L0 — MCP Security Gateway</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c10;--surface:#0d1318;--border:#1a2530;--accent:#00e5ff;--accent2:#ff3d57;--accent3:#39ff14;--text:#e2eaf0;--muted:#4a6070;--card:#0f1a22;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);background:rgba(8,12,16,0.9);backdrop-filter:blur(10px);}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#0088ff);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px rgba(0,229,255,0.3);}
+.logo-text{font-size:20px;font-weight:800;}
+.logo-text span{color:var(--accent);}
+.layer-badge{font-family:'Space Mono',monospace;font-size:12px;padding:6px 16px;border:1px solid var(--accent);border-radius:20px;color:var(--accent);}
+main{position:relative;z-index:10;padding:40px;max-width:1200px;margin:0 auto;}
+.layer-hero{margin-bottom:40px;}
+.layer-tag{font-size:12px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+.layer-title{font-size:48px;font-weight:800;line-height:1.1;margin-bottom:12px;}
+.layer-title span{color:var(--accent);}
+.layer-desc{font-size:16px;color:var(--muted);font-family:'Space Mono',monospace;max-width:600px;line-height:1.6;}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);}
+.panel-title{font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.panel-body{padding:24px;}
+.input-group{margin-bottom:16px;}
+.input-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+textarea,input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;resize:vertical;}
+textarea:focus,input:focus{outline:none;border-color:var(--accent);}
+.btn{padding:10px 20px;border-radius:8px;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;}
+.btn-primary{background:var(--accent);color:var(--bg);width:100%;justify-content:center;}
+.btn-primary:hover{background:#00b8d9;box-shadow:0 0 20px rgba(0,229,255,0.3);}
+.result-box{margin-top:16px;padding:16px;border-radius:8px;font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;display:none;}
+.result-box.safe{background:rgba(57,255,20,0.08);border:1px solid rgba(57,255,20,0.3);color:var(--accent3);}
+.result-box.danger{background:rgba(255,61,87,0.08);border:1px solid rgba(255,61,87,0.3);color:var(--accent2);}
+.result-box.warning{background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.3);color:var(--accent);}
+.log-entry{padding:10px 0;border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;font-size:11px;display:flex;justify-content:space-between;align-items:center;}
+.log-entry:last-child{border-bottom:none;}
+.badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.badge.blocked{background:rgba(255,61,87,0.15);color:var(--accent2);}
+.badge.allowed{background:rgba(57,255,20,0.15);color:var(--accent3);}
+.badge.warning{background:rgba(0,229,255,0.15);color:var(--accent);}
+.threat-list{display:flex;flex-direction:column;gap:10px;}
+.threat-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;background:rgba(255,61,87,0.04);border:1px solid rgba(255,61,87,0.15);}
+.threat-icon{font-size:20px;flex-shrink:0;}
+.threat-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.threat-desc{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;}
+.nav-links{display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;}
+.nav-btn{padding:10px 20px;border-radius:8px;font-family:'Space Mono',monospace;font-size:12px;border:1px solid var(--border);color:var(--muted);cursor:pointer;text-decoration:none;background:transparent;transition:all 0.2s;}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+.nav-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.05);}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <div class="logo-text">Shield<span>AI</span></div>
+  </div>
+  <div class="layer-badge">L0 — MCP GATEWAY</div>
+</header>
+<main>
+  <div class="layer-hero">
+    <div class="layer-tag">// Layer 0 of 12</div>
+    <div class="layer-title">MCP Security <span>Gateway</span></div>
+    <div class="layer-desc">Intercepts all MCP tool calls before execution. Detects data exfiltration, unknown servers, and tool poisoning attacks in real-time.</div>
+  </div>
+
+  <div class="demo-grid">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Inspect MCP Tool Call</div>
+      </div>
+      <div class="panel-body">
+        <div class="input-group">
+          <div class="input-label">MCP Tool Name</div>
+          <input type="text" id="tool-name" placeholder="e.g. read_file, execute_code, web_search" />
+        </div>
+        <div class="input-group">
+          <div class="input-label">Tool Parameters (JSON)</div>
+          <textarea id="tool-params" rows="4" placeholder='{"path": "/etc/passwd", "action": "read"}'></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="analyzeToolCall()">🔍 Analyze Tool Call</button>
+        <div class="result-box" id="tool-result"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Threat Categories</div>
+      </div>
+      <div class="panel-body">
+        <div class="threat-list">
+          <div class="threat-item">
+            <div class="threat-icon">💀</div>
+            <div>
+              <div class="threat-title">Data Exfiltration</div>
+              <div class="threat-desc">Unauthorized access to sensitive files or system resources via MCP tools</div>
+            </div>
+          </div>
+          <div class="threat-item">
+            <div class="threat-icon">🎭</div>
+            <div>
+              <div class="threat-title">Tool Poisoning</div>
+              <div class="threat-desc">Malicious MCP servers returning corrupted tool definitions</div>
+            </div>
+          </div>
+          <div class="threat-item">
+            <div class="threat-icon">🌐</div>
+            <div>
+              <div class="threat-title">Unknown Servers</div>
+              <div class="threat-desc">Connections to non-whitelisted MCP server endpoints</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Live Gateway Log</div>
+      <span class="badge allowed">● ACTIVE</span>
+    </div>
+    <div class="panel-body" id="gateway-log">
+      <div class="log-entry"><span>web_search({query: "ETH price"})</span><span class="badge allowed">ALLOWED</span></div>
+      <div class="log-entry"><span>read_file({path: "/etc/passwd"})</span><span class="badge blocked">BLOCKED</span></div>
+      <div class="log-entry"><span>execute_code({lang: "python", code: "..."})</span><span class="badge warning">REVIEW</span></div>
+      <div class="log-entry"><span>send_transaction({to: "0x...", amount: "1000"})</span><span class="badge allowed">ALLOWED</span></div>
+    </div>
+  </div>
+
+  <div class="nav-links">
+    <a href="dashboard.html" class="nav-btn">← Dashboard</a>
+    <a href="shieldai-layer0.html" class="nav-btn active">L0 MCP Gateway</a>
+    <a href="shieldai-layer1.html" class="nav-btn">L1 Input Firewall →</a>
+  </div>
+</main>
+<script>
+function analyzeToolCall() {
+  const tool = document.getElementById('tool-name').value.toLowerCase();
+  const params = document.getElementById('tool-params').value.toLowerCase();
+  const result = document.getElementById('tool-result');
+  result.style.display = 'block';
+  const dangerous = ['passwd','shadow','/etc/','/sys/','/proc/','private_key','secret','token','delete','drop','rm -'];
+  const isDangerous = dangerous.some(d => params.includes(d) || tool.includes(d));
+  const suspicious = ['execute','eval','shell','bash','cmd','system'];
+  const isSuspicious = suspicious.some(s => tool.includes(s));
+  if(isDangerous) {
+    result.className = 'result-box danger';
+    result.innerHTML = '🚨 BLOCKED — Data exfiltration attempt detected\n\nReason: Tool call attempts to access sensitive system resources.\nAction: Request terminated. Incident logged.\nLayer: L0 MCP Security Gateway';
+  } else if(isSuspicious) {
+    result.className = 'result-box warning';
+    result.innerHTML = '⚠️ FLAGGED — Suspicious tool execution\n\nReason: Code execution tool detected — requires human approval for high-value operations.\nAction: Queued for review.\nLayer: L0 MCP Security Gateway';
+  } else {
+    result.className = 'result-box safe';
+    result.innerHTML = '✅ ALLOWED — Tool call passed gateway\n\nTool: ' + (document.getElementById('tool-name').value || 'unknown') + '\nRisk Level: Low\nAction: Forwarded to agent.\nLayer: L0 MCP Security Gateway';
+  }
+}
+</script>
+</body>
+</html>

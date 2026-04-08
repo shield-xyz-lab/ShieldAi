@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldAI — L7 Outbound Firewall</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{--bg:#040208;--s1:#08040f;--s2:#0f0818;--b1:#1e0c35;--b2:#2d1650;--red:#ef4444;--r2:#f87171;--amber:#f59e0b;--green:#10b981;--v2:#a855f7;--cyan:#06b6d4;--gold:#fbbf24;--text:#e8d8f8;--t2:#6a4a88;--t3:#2a1a40;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(239,68,68,.08) 0%,transparent 55%);}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(239,68,68,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(239,68,68,.025) 1px,transparent 1px);background-size:52px 52px;}
+.wrap{max-width:1440px;margin:0 auto;padding:20px 28px;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--b2);margin-bottom:18px;}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(239,68,68,.3),rgba(245,158,11,.15));border:1px solid rgba(239,68,68,.4);display:flex;align-items:center;justify-content:center;font-size:20px;animation:lg 3s ease-in-out infinite;}
+@keyframes lg{0%,100%{box-shadow:0 0 20px rgba(239,68,68,.2);}50%{box-shadow:0 0 50px rgba(239,68,68,.5);}}
+.brand-name{font-size:19px;font-weight:800;background:linear-gradient(135deg,#ffe8e8 20%,var(--red) 60%,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-left:12px;}
+.brand-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.8px;margin-left:12px;}
+.chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;}
+.chip.r{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--r2);}
+.chip.new{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(245,158,11,.15));border:1px solid rgba(248,113,113,.4);color:#ffe8e8;font-weight:700;}
+.chip.api-live{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green);}
+.chip.api-off{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red);}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:dp 1.5s ease-in-out infinite;}
+@keyframes dp{0%,100%{opacity:1;}50%{opacity:.2;}}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px;}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
+.stat-bar{position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t2);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;}
+.stat-val{font-size:22px;font-weight:800;}
+.stat-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-top:2px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid3{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px;}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;overflow:hidden;}
+.card-hd{padding:11px 16px;border-bottom:1px solid var(--b1);background:var(--s2);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t2);}
+.card-body{padding:16px;}
+.threat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.tc{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px;position:relative;}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0;}
+.tc.c::before{background:var(--red);}.tc.h::before{background:var(--amber);}.tc.n::before{background:var(--gold);}
+.tc-icon{font-size:22px;margin-bottom:6px;}.tc-name{font-size:12px;font-weight:800;margin-bottom:4px;}
+.tc-name.c{color:var(--red);}.tc-name.h{color:var(--amber);}.tc-name.n{color:var(--gold);}
+.tc-desc{font-size:10px;color:var(--t2);line-height:1.5;}
+.tc-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:8px;font-family:'JetBrains Mono',monospace;font-weight:600;margin-top:5px;}
+.tc-badge.c{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.tc-badge.h{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.15);}
+.tc-badge.n{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.15);}
+.rate-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.rate-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t2);width:120px;flex-shrink:0;}
+.rate-track{flex:1;height:14px;background:var(--b1);border-radius:4px;overflow:hidden;}
+.rate-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;transition:width .8s;}
+.rate-fill span{font-size:8px;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,.8);font-weight:600;}
+.rate-fill.s{background:linear-gradient(90deg,var(--green),#059669);}
+.rate-fill.w{background:linear-gradient(90deg,var(--amber),#d97706);}
+.rate-fill.d{background:linear-gradient(90deg,var(--red),#dc2626);animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+.domain-item{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:5px;}
+.domain-item.a{border-color:rgba(16,185,129,.2);}.domain-item.b{border-color:rgba(239,68,68,.2);background:rgba(239,68,68,.04);}.domain-item.n{border-color:rgba(245,158,11,.2);background:rgba(245,158,11,.03);}
+.ds{padding:2px 5px;border-radius:4px;font-size:8px;font-weight:600;}
+.ds.a{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2);}
+.ds.b{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.ds.n{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+.feed{max-height:240px;overflow-y:auto;}
+.fr{display:grid;grid-template-columns:50px 90px 1fr 80px 70px;gap:6px;align-items:center;padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-family:'JetBrains Mono',monospace;font-size:10px;}
+.fr.hdr{color:var(--t3);font-size:9px;text-transform:uppercase;border-bottom:1px solid var(--b2);}
+.fr.bl{background:rgba(239,68,68,.04);border-left:2px solid var(--red);}
+.fr.ok{border-left:2px solid transparent;}.fr.wn{background:rgba(245,158,11,.03);border-left:2px solid var(--amber);}
+.badge{display:inline-flex;padding:2px 5px;border-radius:4px;font-size:9px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.badge.block{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.badge.allow{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2);}
+.badge.freeze{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+.sim-btn{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Syne',sans-serif;font-size:11px;cursor:pointer;text-align:left;transition:all .2s;line-height:1.5;width:100%;margin-bottom:6px;}
+.sim-btn:hover{border-color:var(--red);background:rgba(239,68,68,.06);}
+.stag{display:inline-block;padding:2px 5px;border-radius:4px;font-size:8px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:3px;}
+.stag.r{background:rgba(239,68,68,.14);color:var(--red);}
+.stag.a{background:rgba(245,158,11,.12);color:var(--amber);}
+.stag.g{background:rgba(16,185,129,.1);color:var(--green);}
+.rule-item{background:var(--s2);border:1px solid var(--b1);border-radius:7px;padding:9px 11px;margin-bottom:6px;}
+.rc{font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:3px;}
+.rc .kw{color:var(--amber);}.rc .op{color:var(--v2);}.rc .act{color:var(--red);font-weight:700;}
+.rd{font-size:10px;color:var(--t2);}
+.ls{display:flex;flex-direction:column;gap:4px;}
+.lr{display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;font-size:10px;}
+.lr.active{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06);}
+.lr.new{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.04);}
+.lr-n{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;width:28px;color:var(--t2);}
+.lr.active .lr-n{color:var(--red);}.lr.new .lr-n{color:var(--gold);}
+.lr-nm{font-weight:600;flex:1;}
+.lr-s{font-size:9px;font-family:'JetBrains Mono',monospace;}
+.lr-s.a{color:var(--green);}.lr-s.active{color:var(--red);font-weight:700;}.lr-s.new{color:var(--gold);font-weight:700;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+.mono{font-family:'JetBrains Mono',monospace;}.muted{color:var(--t2);}
+.es{padding:14px;text-align:center;color:var(--t3);font-family:'JetBrains Mono',monospace;font-size:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div style="display:flex;align-items:center;">
+    <div class="logo">🔥</div>
+    <div>
+      <div class="brand-name">ShieldAI — Layer 7: Outbound Firewall</div>
+      <div class="brand-sub">// State-Sponsored Attack Defense · Rate Limiter · Domain Whitelist · Weapon Code Detection</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div class="chip new">★ NEW — 2026 Architecture</div>
+    <div class="chip r"><div class="dot"></div>Outbound Monitor ACTIVE</div>
+    <div class="chip api-off" id="apiBadge"><div class="dot"></div><span id="apiStatus">Connecting...</span></div>
+  </div>
+</nav>
+
+<div class="stats">
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--red),transparent)"></div><div class="stat-lbl">Blocked</div><div class="stat-val" style="color:var(--red)" id="s1">0</div><div class="stat-sub">outbound blocked</div></div>
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--amber),transparent)"></div><div class="stat-lbl">Frozen</div><div class="stat-val" style="color:var(--amber)" id="s2">0</div><div class="stat-sub">agents frozen</div></div>
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--green),transparent)"></div><div class="stat-lbl">Clean</div><div class="stat-val" style="color:var(--green)" id="s3">0</div><div class="stat-sub">allowed outbound</div></div>
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--v2),transparent)"></div><div class="stat-lbl">Rate Alerts</div><div class="stat-val" style="color:var(--v2)" id="s4">0</div><div class="stat-sub">threshold hit</div></div>
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--cyan),transparent)"></div><div class="stat-lbl">New Domains</div><div class="stat-val" style="color:var(--cyan)" id="s5">0</div><div class="stat-sub">unknown targets</div></div>
+  <div class="stat"><div class="stat-bar" style="background:linear-gradient(90deg,var(--gold),transparent)"></div><div class="stat-lbl">Weapon Code</div><div class="stat-val" style="color:var(--gold)" id="s6">0</div><div class="stat-sub">exploit patterns</div></div>
+</div>
+
+<div class="threat-grid">
+  <div class="tc c"><div class="tc-icon">🏴󠁧󠁢󠁳󠁣󠁴󠁿</div><div class="tc-name c">State-Sponsored AI Attack</div><div class="tc-desc">GTG-1002 pattern: 1024 req/sec against 30 targets simultaneously. AI executes 80-90% of attack autonomously. Traditional security never detected it — victim companies noticed nothing.</div><div class="tc-badge c">🔴 REAL ATTACK — September 2025</div></div>
+  <div class="tc h"><div class="tc-icon">🌐</div><div class="tc-name h">Lateral Movement</div><div class="tc-desc">Compromised agent attacks adjacent systems. Breaks declared scope to interact with unrelated APIs, databases, infrastructure. Detected by domain whitelist + scope analysis.</div><div class="tc-badge h">🟡 HIGH RISK</div></div>
+  <div class="tc n"><div class="tc-icon">💾</div><div class="tc-name n">Micro-Exfiltration</div><div class="tc-desc">Data broken into 200+ tiny chunks that bypass DLP individually. Each packet looks innocent. Total volume reveals pattern. ShieldAI detects by monitoring chunk velocity over time.</div><div class="tc-badge n">★ NEW VECTOR 2026</div></div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-hd"><div class="card-title">📊 Real-Time Rate Monitor (threshold: 500/min)</div></div>
+    <div class="card-body">
+      <div class="rate-row"><div class="rate-lbl">DeFi Agent 01</div><div class="rate-track"><div class="rate-fill s" style="width:2.4%"><span>12/min</span></div></div></div>
+      <div class="rate-row"><div class="rate-lbl">Portfolio Bot</div><div class="rate-track"><div class="rate-fill s" style="width:9%"><span>45/min</span></div></div></div>
+      <div class="rate-row"><div class="rate-lbl">Arbitrage Bot</div><div class="rate-track"><div class="rate-fill w" style="width:36%"><span>180/min</span></div></div></div>
+      <div class="rate-row"><div class="rate-lbl">Unknown Agent</div><div class="rate-track"><div class="rate-fill s" id="unknownFill" style="width:0%"><span id="unknownVal">0/min</span></div></div></div>
+      <div style="margin-top:10px;display:flex;gap:12px;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);"><div style="width:8px;height:8px;border-radius:2px;background:var(--green);"></div>Safe &lt;200</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);"><div style="width:8px;height:8px;border-radius:2px;background:var(--amber);"></div>Warn 200-500</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2);"><div style="width:8px;height:8px;border-radius:2px;background:var(--red);"></div>FREEZE &gt;500</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-title">🌐 Domain Whitelist Registry</div></div>
+    <div class="card-body">
+      <div class="domain-item a"><span>api.mantle.xyz</span><span class="ds a">✓ APPROVED</span></div>
+      <div class="domain-item a"><span>api.uniswap.org</span><span class="ds a">✓ APPROVED</span></div>
+      <div class="domain-item a"><span>rpc.arbitrum.io</span><span class="ds a">✓ APPROVED</span></div>
+      <div class="domain-item a"><span>api.aave.com</span><span class="ds a">✓ APPROVED</span></div>
+      <div class="domain-item a"><span>slack.com</span><span class="ds a">✓ APPROVED</span></div>
+      <div class="domain-item b"><span>unknown-c2.xyz</span><span class="ds b">✕ BLOCKED</span></div>
+      <div class="domain-item b"><span>exfil-server.ru</span><span class="ds b">✕ BLOCKED</span></div>
+      <div class="domain-item n"><span>new-domain-1234.com</span><span class="ds n">~ NEW</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid3">
+  <div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-hd"><div class="card-title">📡 Outbound Traffic Monitor<span style="width:5px;height:5px;background:var(--red);border-radius:50%;display:inline-block;margin-left:6px;animation:dp 1s infinite;"></span></div></div>
+      <div class="fr hdr"><span>Time</span><span>Agent</span><span>Destination</span><span>Rate/min</span><span>Result</span></div>
+      <div class="feed" id="feed"><div class="es">// Monitoring outbound — run scenario →</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">📋 Deterministic Defense Rules</div></div>
+      <div class="card-body">
+        <div class="rule-item"><div class="rc"><span class="kw">IF</span> req_rate <span class="op">&gt;</span> 500/min <span class="op">→</span> <span class="act">FREEZE_AGENT</span></div><div class="rd">Rate limiter — no legitimate agent needs 500+ req/min</div></div>
+        <div class="rule-item"><div class="rc"><span class="kw">IF</span> domain NOT IN whitelist <span class="op">→</span> <span class="act">QUARANTINE</span></div><div class="rd">Domain whitelist — new domains require explicit human auth</div></div>
+        <div class="rule-item"><div class="rc"><span class="kw">IF</span> output.matches(EXPLOIT_PATTERN) <span class="op">→</span> <span class="act">IMMEDIATE_BLOCK</span></div><div class="rd">Weapon code: 47 hardcoded exploit/reverse-shell patterns</div></div>
+        <div class="rule-item"><div class="rc"><span class="kw">IF</span> chunks&gt;50 AND interval&lt;5s <span class="op">→</span> <span class="act">BLOCK_MICRO_EXFIL</span></div><div class="rd">Micro-exfiltration: DLP bypass via packet fragmentation</div></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-hd"><div class="card-title">⚡ Attack Scenarios</div></div>
+      <div class="card-body">
+        <button class="sim-btn" onclick="sim('gtg')"><div class="stag r">★ STATE ACTOR</div><br>GTG-1002 — 1024 req/min against 30 targets</button>
+        <button class="sim-btn" onclick="sim('exfil')"><div class="stag r">🔴 Critical</div><br>Micro-Exfiltration — 200 chunks DLP bypass</button>
+        <button class="sim-btn" onclick="sim('exploit')"><div class="stag r">🔴 Critical</div><br>Exploit Code in Output — weapon detected</button>
+        <button class="sim-btn" onclick="sim('c2')"><div class="stag a">🟡 High</div><br>C2 Contact — unknown domain 50x/5sec</button>
+        <button class="sim-btn" onclick="sim('normal')"><div class="stag g">🟢 Normal</div><br>Normal API — approved domain, clean output</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title">📚 ShieldAI — 10 Layers</div></div>
+      <div class="card-body">
+        <div class="ls">
+          <div class="lr"><span class="lr-n">L0</span><span class="lr-nm">MCP Gateway</span><span class="lr-s a">✓</span></div>
+          <div class="lr"><span class="lr-n">L1</span><span class="lr-nm">Input Firewall</span><span class="lr-s a">✓</span></div>
+          <div class="lr"><span class="lr-n">L2</span><span class="lr-nm">Memory Protection</span><span class="lr-s a">✓</span></div>
+          <div class="lr"><span class="lr-n">L3</span><span class="lr-nm">Intent Checker</span><span class="lr-s a">✓</span></div>
+          <div class="lr"><span class="lr-n">L4</span><span class="lr-nm">TX Guardian</span><span class="lr-s a">✓</span></div>
+          <div class="lr"><span class="lr-n">L5</span><span class="lr-nm">Agent Watchdog</span><span class="lr-s a">✓</span></div>
+          <div class="lr"><span class="lr-n">L6</span><span class="lr-nm">Human Gate</span><span class="lr-s a">✓</span></div>
+          <div class="lr active"><span class="lr-n">L7</span><span class="lr-nm">Outbound Firewall</span><span class="lr-s active">★ THIS</span></div>
+          <div class="lr new"><span class="lr-n">L8</span><span class="lr-nm">Package Guardian</span><span class="lr-s new">★ NEW</span></div>
+          <div class="lr new"><span class="lr-n">L9</span><span class="lr-nm">Outcome Verifier</span><span class="lr-s new">★ NEW</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const API_BASE = 'https://shieldai-production.up.railway.app';
+
+async function checkApiHealth() {
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const badge = document.getElementById('apiBadge');
+      badge.className = 'chip api-live';
+      badge.innerHTML = '<div class="dot"></div><span>API LIVE — Railway</span>';
+    } else throw new Error();
+  } catch {
+    document.getElementById('apiStatus').textContent = 'API offline — local mode';
+  }
+}
+checkApiHealth();
+
+let st={b:0,f:0,c:0,r:0,d:0,w:0};
+const SCEN={
+  gtg:{agent:'Unknown Agent',dest:'30 external targets',rate:1024,cls:'bl',badge:'block',btxt:'🔥 FREEZE',color:'var(--red)',msg:'AGENT FROZEN — State-Sponsored Attack Pattern (GTG-1002)',isFreeze:true},
+  exfil:{agent:'Portfolio Bot',dest:'storage-bucket.xyz',rate:180,cls:'bl',badge:'block',btxt:'⛔ BLOCK',color:'var(--red)',msg:'BLOCKED — Micro-Exfiltration (200 chunks < 8s)'},
+  exploit:{agent:'Arbitrage Bot',dest:'pastebin.com',rate:8,cls:'bl',badge:'block',btxt:'⛔ BLOCK',color:'var(--red)',msg:'BLOCKED — Weapon Code Detected (exploit pattern #31)'},
+  c2:{agent:'DeFi Agent 01',dest:'unknown-c2.xyz',rate:50,cls:'wn',badge:'freeze',btxt:'⚠ WARN',color:'var(--amber)',msg:'WARNING — C2 Domain + New Contact Pattern'},
+  normal:{agent:'Portfolio Bot',dest:'api.uniswap.org',rate:12,cls:'ok',badge:'allow',btxt:'✓ ALLOW',color:'var(--green)',msg:'ALLOWED — Approved domain, rate safe, clean output'},
+};
+
+function sim(k){
+  const s=SCEN[k];if(!s)return;
+  if(s.isFreeze){st.f++;st.b++;document.getElementById('unknownFill').className='rate-fill d';document.getElementById('unknownFill').style.width='100%';document.getElementById('unknownVal').textContent='1024/min';}
+  else if(s.cls==='bl')st.b++;
+  else if(s.cls==='wn')st.d++;
+  else st.c++;
+  addRow(s);showAlert(s);
+  document.getElementById('s1').textContent=st.b;
+  document.getElementById('s2').textContent=st.f;
+  document.getElementById('s3').textContent=st.c;
+  document.getElementById('s4').textContent=st.r;
+  document.getElementById('s5').textContent=st.d;
+  document.getElementById('s6').textContent=st.w;
+}
+
+function addRow(s){
+  const feed=document.getElementById('feed');
+  const emp=feed.querySelector('.es');if(emp)feed.innerHTML='';
+  const rc=s.rate>500?'var(--red)':s.rate>200?'var(--amber)':'var(--green)';
+  const row=document.createElement('div');
+  row.className='fr '+s.cls;
+  row.innerHTML=`<span class="muted">${new Date().toLocaleTimeString('en-US',{hour12:false})}</span><span style="color:var(--cyan);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.agent}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t2)">${s.dest}</span><span style="color:${rc};font-weight:700">${s.rate}</span><span><span class="badge ${s.badge}">${s.btxt}</span></span>`;
+  feed.insertBefore(row,feed.firstChild);
+}
+
+function showAlert(s){
+  const a=document.createElement('div');
+  a.style.cssText='position:fixed;top:20px;right:20px;z-index:9999;padding:12px 16px;border-radius:10px;font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;max-width:320px;';
+  const rgb=s.color==='var(--red)'?'239,68,68':s.color==='var(--amber)'?'245,158,11':'16,185,129';
+  a.style.background=`rgba(${rgb},.15)`;
+  a.style.border=`1px solid ${s.color}`;
+  a.style.color=s.color;
+  a.innerHTML=s.msg;
+  document.body.appendChild(a);
+  setTimeout(()=>a.remove(),3000);
+}
+</script>
+</body>
+</html>
