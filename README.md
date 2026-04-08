@@ -1,246 +1,144 @@
+[README (3).md](https://github.com/user-attachments/files/26573642/README.3.md)
 # 🛡️ ShieldAI — AI Agent Security Layer
 
-> **The first multi-layer security platform for autonomous AI agents operating in crypto and DeFi environments.**
+> **$45M+ lost to AI agent exploits in Q1 2026. ShieldAI is the fix.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Network: Mantle](https://img.shields.io/badge/Network-Mantle-purple)](https://mantle.xyz)
-[![Status: MVP](https://img.shields.io/badge/Status-MVP%20Live-green)](https://shieldai.xyz)
-[![Layers: 7/7](https://img.shields.io/badge/Layers-7%2F7%20Complete-blue)](https://shieldai.xyz/demo)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Network](https://img.shields.io/badge/Network-Mantle-purple.svg)](https://mantle.xyz)
+[![Status](https://img.shields.io/badge/Status-MVP%20Live-brightgreen.svg)](https://getshieldai.xyz)
+[![Layers](https://img.shields.io/badge/Layers-13%2F13%20Complete-brightgreen.svg)](https://shield-xyz-lab.github.io/ShieldAi/dashboard.html)
+[![SDK](https://img.shields.io/badge/npm-@shieldai--xyz%2Fsdk-red.svg)](https://www.npmjs.com/package/@shieldai-xyz/sdk)
+
+ShieldAI is the **first multi-layer runtime security platform** for autonomous AI agents operating in crypto and DeFi environments.
+
+Unlike code auditors (pre-deployment) or wallets (custody), ShieldAI enforces security **at runtime** — while the agent is executing.
 
 ---
 
 ## 🚨 The Problem
 
-In 2025, over **$17 billion** was stolen from crypto. AI-enabled scams were **450% more profitable** than traditional schemes. As autonomous AI agents gain the ability to sign transactions, manage DeFi positions, and control DAO treasuries — the attack surface has fundamentally shifted.
+In Q1 2026, over **$45M** was lost to AI agent exploits:
 
-Traditional security tools (firewalls, EDRs, smart contract auditors) were built for deterministic code. They don't understand **semantic intent**, can't detect **prompt injection**, and have no concept of **behavioral drift** in an AI agent context.
+- **Step Finance** — $27.3M drained via compromised AI agent permissions
+- **Resolv Labs** — $25M+ via AWS KMS key compromise affecting AI-managed funds
+- **OpenClaw** — $250K lost due to AI parsing error exploited by attackers
+- **250,000+ daily active AI agents** on-chain (↑400% YoY)
+
+Traditional security tools were built for deterministic code. They don't understand **semantic intent**, can't detect **prompt injection**, and have no concept of **behavioral drift** in an AI agent context.
 
 **ShieldAI was built specifically for this gap.**
 
 ---
 
-## ✅ The Solution — 7 Security Layers
-
-ShieldAI wraps any autonomous AI agent (Claude, GPT-4, AgentKit, ElizaOS) with 7 independent security layers that work together as a coordinated defense:
+## ✅ The Solution — 13 Security Layers
 
 | Layer | Name | Function | Threat Covered |
-|-------|------|----------|---------------|
-| **L0** | MCP Gateway | Intercepts all MCP tool calls before execution | Data exfiltration, unknown servers, tool poisoning |
-| **L1** | Input Firewall | Scans all external data entering the agent | Prompt injection, hidden text, unicode spoofing |
-| **L2** | Memory Protection | Cryptographic hash chain for agent memory | Memory poisoning, rule injection, history tampering |
-| **L3** | Intent Checker | Claude API semantic analysis of agent actions | Scope creep, behavioral inconsistency, social engineering |
-| **L4** | TX Guardian | Pre-chain transaction simulation and validation | Wallet drainers, honeypots, scam addresses |
-| **L5** | Agent Watchdog | Behavioral baseline + anomaly detection | Behavioral drift, burst attacks, off-hours activity |
-| **L6** | Human Gate | Hardware-attested biometric authorization | High-value transactions ($10K+), critical operations |
+|-------|------|----------|----------------|
+| L0 | MCP Gateway | Intercepts all MCP tool calls before execution | Data exfiltration, unknown servers, tool poisoning |
+| L1 | Input Firewall | Scans all external data entering the agent | Prompt injection, hidden text, unicode spoofing |
+| L2 | Memory Protection | Cryptographic hash chain for agent memory | Memory poisoning, rule injection, history tampering |
+| L3 | Intent Checker | Claude API semantic analysis of agent actions | Scope creep, behavioral inconsistency, social engineering |
+| L4 | TX Guardian | Pre-chain transaction simulation and validation | Wallet drainers, honeypots, scam addresses |
+| L5 | Agent Watchdog | Behavioral baseline + anomaly detection | Behavioral drift, burst attacks, off-hours activity |
+| L6 | Human Gate | Hardware-attested biometric authorization | High-value transactions ($10K+), critical operations |
+| L7 | Rate Limiter | Per-agent transaction rate enforcement | Flood attacks, rapid drain attempts |
+| L8 | Whitelist Engine | Dynamic counterparty whitelisting | Unauthorized recipients, new addresses |
+| L9 | Freeze Circuit | Emergency agent freeze mechanism | Active exploits, anomalous behavior patterns |
+| L10 | SpendGuard | On-chain spend limit enforcement (Solidity) | Overspend, daily limit breaches |
+| L11 | EU AI Act Logger | Compliance logging for Articles 9,13,14,15,17,72 | Regulatory non-compliance, audit failures |
+| L12 | Audit Trail | Immutable on-chain event log | Tamper attempts, accountability gaps |
 
 ---
 
-## 🎯 Live Demo
+## 🎮 Interactive Demos
 
-Every layer has an interactive browser demo — no installation required:
+Every layer has a live browser demo — no installation required:
 
 | Layer | Demo | Description |
 |-------|------|-------------|
-| L0 MCP Gateway | [→ Demo](https://shieldai.github.io/layer0) | Intercept and inspect MCP tool calls in real-time |
-| L1 Input Firewall | [→ Demo](https://shieldai.github.io/layer1) | Test 13 prompt injection detection patterns |
-| L2 Memory Protection | [→ Demo](https://shieldai.github.io/layer2) | Simulate memory poisoning attacks and defenses |
-| L3 Intent Checker | [→ Demo](https://shieldai.github.io/layer3) | AI-powered semantic intent analysis (live Claude API) |
-| L4 TX Guardian | [→ Demo](https://shieldai.github.io/layer4) | Simulate transaction validation and drainer detection |
-| L5 Agent Watchdog | [→ Demo](https://shieldai.github.io/layer5) | Behavioral anomaly scoring and auto-freeze |
-| L6 Human Gate | [→ Demo](https://shieldai.github.io/layer6) | Mobile biometric authorization flow |
+| L0 MCP Gateway | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer0.html) | Intercept and inspect MCP tool calls in real-time |
+| L1 Input Firewall | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer1.html) | Test 13 prompt injection detection patterns |
+| L2 Memory Protection | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer2.html) | Simulate memory poisoning attacks and defenses |
+| L3 Intent Checker | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer3.html) | AI-powered semantic intent analysis (live Claude API) |
+| L4 TX Guardian | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer4.html) | Simulate transaction validation and drainer detection |
+| L5 Agent Watchdog | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer5.html) | Behavioral anomaly scoring and auto-freeze |
+| L6 Human Gate | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer6.html) | Mobile biometric authorization flow |
+| L7 Rate Limiter | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer7.html) | Real-time rate limiting simulation |
+| L8 Whitelist Engine | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer8.html) | Dynamic whitelist management |
+| L9 Freeze Circuit | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer9.html) | Emergency freeze and recovery flow |
+| L10 SpendGuard | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer10.html) | On-chain spend limit enforcement |
+| L11 EU AI Act | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer11.html) | Compliance report generator |
+| L12 Audit Trail | [→ Demo](https://shield-xyz-lab.github.io/ShieldAi/shieldai-layer12.html) | Immutable on-chain audit log |
+
+**[→ Main Dashboard](https://shield-xyz-lab.github.io/ShieldAi/dashboard.html)**
 
 ---
 
-## ⚡ Attack Vectors Covered
+## 🚀 Deployments
 
-ShieldAI protects against **7 categories of AI agent attacks**:
-
-- **Prompt Injection** — Hidden instructions in external data override agent's system prompt
-- **Memory Poisoning** — Attacker injects false "memories" that permanently alter agent behavior
-- **Agent-to-Agent Infection** — Compromised agents propagate malicious instructions across agent networks
-- **Wallet Drainer Contracts** — Contracts that appear normal in simulation but drain all assets
-- **Behavioral Manipulation** — Series of individually innocent actions that collectively achieve theft
-- **Urgency Social Engineering** — Artificial time pressure forcing agents to bypass safety procedures
-- **Permission Drift** — Gradual escalation of agent permissions through injected instructions
+| Contract | Network | Address | Explorer |
+|----------|---------|---------|---------|
+| SpendGuard.sol | Mantle Sepolia Testnet | `0x7f875B92c772C48281a901C4BF32b53d6329fadC` | [View ↗](https://sepolia.mantlescan.xyz/address/0x7f875B92c772C48281a901C4BF32b53d6329fadC) |
+| SpendGuard.sol | Arbitrum One (Mainnet) | `0xE03C389DF391549E44c2aa807576c9eE2956C2d8` | [View ↗](https://arbiscan.io/address/0xE03C389DF391549E44c2aa807576c9eE2956C2d8) |
 
 ---
 
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    AI AGENT (any LLM)                       │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ all actions
-          ┌────────────▼────────────┐
-          │   L0: MCP GATEWAY       │ ← intercepts tool calls
-          │   Policy Engine         │
-          │   Blockchain Bridge     │
-          └──┬──────────┬──────────┘
-             │ clean    │ crypto detected
-    ┌────────▼──┐  ┌────▼────────────────────────────────┐
-    │ MCP       │  │  CRYPTO SECURITY STACK               │
-    │ SERVERS   │  │  L1 Input → L2 Memory → L3 Intent   │
-    └───────────┘  │  L4 TX    → L5 Watchdog → L6 Gate   │
-                   └─────────────────────────────────────┘
-```
-
-**Unique competitive advantage:** When L0 MCP Gateway detects a crypto operation, it automatically escalates to the full L1-L6 blockchain security stack. No competitor (including Prompt Security / SentinelOne) has this combined MCP + blockchain protection layer.
-
----
-
-## 🚀 Quick Start
+## 📦 SDK
 
 ```bash
-pip install shieldai-sdk
+npm install @shieldai-xyz/sdk
 ```
 
-```python
-from shieldai import ShieldAI
+```typescript
+import { ShieldAI } from '@shieldai-xyz/sdk';
 
-# Initialize with your configuration
-shield = ShieldAI(
-    api_key="your-api-key",
-    network="mantle",           # or "ethereum", "arbitrum"
-    threshold_usd=10000,        # Human Gate threshold
-    whitelist=["uniswap-v4", "aave-v3", "curve"]
-)
+const shield = new ShieldAI({
+  contractAddress: '0x7f875B92c772C48281a901C4BF32b53d6329fadC',
+  network: 'mantle-sepolia'
+});
 
-# Wrap any agent action
-@shield.protect
-async def agent_action(tx):
-    # Your agent logic here
-    pass
+const result = await shield.checkSpend({
+  agent: agentAddress,
+  amount: transactionAmount,
+  token: 'USDC'
+});
 
-# Or check explicitly
-result = await shield.check_transaction(
-    to="0x742d35Cc...",
-    amount=5.8,
-    token="ETH",
-    agent_intent="Portfolio rebalancing on Uniswap V4"
-)
-
-if result.verdict == "APPROVED":
-    # Execute transaction
-    pass
-elif result.verdict == "BLOCKED":
-    raise SecurityException(f"Blocked: {result.reason}")
-elif result.verdict == "HUMAN_GATE":
-    # Send mobile push notification and wait for approval
-    await shield.request_human_approval(result)
+if (!result.allowed) {
+  console.log('Blocked:', result.reason);
+}
 ```
 
 ---
 
-## 🔌 Integrations
+## ⚖️ EU AI Act Compliance
 
-ShieldAI is designed as middleware — drop it into any existing AI agent stack:
+ShieldAI's **L11 EU AI Act Logger** is our primary differentiator — **no direct competitors** exist in this space.
 
-| Platform | Status | Notes |
-|----------|--------|-------|
-| [ElizaOS](https://github.com/elizaOS/eliza) | 🔜 Q2 2026 | Most popular AI agent framework in crypto |
-| [Coinbase AgentKit](https://github.com/coinbase/agentkit) | 🔜 Q2 2026 | Native crypto agent framework |
-| Claude / Anthropic | ✅ L3 Live | Intent Checker uses Claude Sonnet API |
-| Cursor / VS Code | 🔜 Q3 2026 | MCP Gateway for IDE agents |
-| Custom agents | ✅ SDK | Use ShieldAI SDK with any LLM |
+Covers Articles: **9** · **13** · **14** · **15** · **17** · **72**
 
 ---
 
-## 📊 Threat Detection Performance (MVP)
+## 🏆 Competitive Positioning
 
-| Metric | Value |
-|--------|-------|
-| Prompt injection patterns | 13 detection rules |
-| Known scam addresses | 2M+ database |
-| Transaction simulation | Pre-chain via fork |
-| Behavioral baseline | 72h learning period |
-| Auto-freeze threshold | Anomaly score ≥ 85 |
-| Human Gate threshold | Transactions ≥ $10,000 |
-| Average response time | < 200ms per layer |
+| | ShieldAI | Claw Wallet | Octane |
+|--|---------|-------------|--------|
+| Runtime monitoring | ✅ | ❌ | ❌ |
+| Spend enforcement on-chain | ✅ | ⚠️ custody only | ❌ |
+| EU AI Act compliance | ✅ | ❌ | ❌ |
+| 13-layer architecture | ✅ | ❌ | ❌ |
+| Code auditing | ❌ | ❌ | ✅ |
 
 ---
 
-## 🗺️ Roadmap
+## 🌐 Links
 
-### Phase 1 — Q2 2026
-- [ ] Production backend API (FastAPI + Python)
-- [ ] Smart contracts deployment on Mantle Testnet
-- [ ] ElizaOS SDK integration
-- [ ] Coinbase AgentKit SDK integration
-- [ ] 10 beta partners onboarded
-
-### Phase 2 — Q3 2026
-- [ ] Mantle Mainnet launch (all 7 layers)
-- [ ] Self-serve SaaS dashboard
-- [ ] GoPlus Security API integration (blacklist)
-- [ ] Forta Network threat feeds integration
-- [ ] 100 active protected agents
-
-### Phase 3 — Q4 2026
-- [ ] Cross-chain expansion (Arbitrum, NEAR)
-- [ ] Bug bounty program launch
-- [ ] Enterprise white-label offering
-- [ ] Series A / strategic partnership
-
----
-
-## 💰 Pricing
-
-| Plan | Price | Best For |
-|------|-------|----------|
-| **Free** | $0/month | Individual developers, testing |
-| **Pro** | $29/month | Active traders, small teams |
-| **Agent** | $99/month | Multi-agent systems, power users |
-| **Protocol** | $999/month | DeFi protocols, DAOs |
-| **Enterprise** | Custom | Institutions, funds |
-
----
-
-## 🔐 Security & Audits
-
-- Smart contracts will be audited before Mainnet launch
-- All layers are independent — compromise of one doesn't disable others
-- Memory Protection uses cryptographic hash chains (tamper-evident)
-- Human Gate uses hardware-attested biometric signatures
-- Zero-knowledge proof integration planned for Q4 2026
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-Areas where we need help:
-- Smart contract development (Solidity / Mantle)
-- ML model improvements for anomaly detection
-- Additional MCP server integrations
-- Security research and responsible disclosure
+- **Dashboard:** [shield-xyz-lab.github.io/ShieldAi/dashboard.html](https://shield-xyz-lab.github.io/ShieldAi/dashboard.html)
+- **Twitter/X:** [@ShieldAI2026](https://twitter.com/ShieldAI2026)
+- **npm SDK:** [@shieldai-xyz/sdk](https://www.npmjs.com/package/@shieldai-xyz/sdk)
+- **Donate:** [Giveth ↗](https://giveth.io/project/shieldai-ai-agent-security-monitoring-layer)
 
 ---
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## 🔗 Links
-
-- 🌐 Website: [shieldai.xyz](https://shieldai.xyz) *(coming soon)*
-- 📖 Docs: [docs.shieldai.xyz](https://docs.shieldai.xyz) *(coming soon)*
-- 🐦 Twitter: [@ShieldAI_xyz](https://twitter.com/ShieldAI_xyz)
-- 💬 Discord: [discord.gg/shieldai](https://discord.gg/shieldai) *(coming soon)*
-- 📧 Contact: contact@shieldai.xyz
-
----
-
-## 🙏 Acknowledgments
-
-Built with support from:
-- [Mantle Network](https://mantle.xyz) — Blockchain infrastructure and grants
-- [Anthropic](https://anthropic.com) — Claude API powering Layer 3 Intent Checker
-- [Tenderly](https://tenderly.co) — Transaction simulation infrastructure
-
----
-
-*ShieldAI — Protecting the Future of Autonomous Finance*
+MIT — Built by [ShieldAI Lab](https://github.com/shield-xyz-lab)
